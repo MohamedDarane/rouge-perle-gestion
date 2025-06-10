@@ -23,3 +23,42 @@ export interface Activity {
   action: string;
   timestamp: Date;
 }
+
+export interface Drink {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  description: string;
+}
+
+export interface OrderItem {
+  drinkId: string;
+  drinkName: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface Order {
+  id: string;
+  items: OrderItem[];
+  total: number;
+  date: Date;
+  agentId: string;
+  agentName: string;
+  completed: boolean;
+}
+
+export interface Revenue {
+  date: string;
+  amount: number;
+}
+
+export interface TimeLog {
+  id: string;
+  userId: string;
+  userName: string;
+  clockIn: Date;
+  clockOut?: Date;
+  date: string;
+}
