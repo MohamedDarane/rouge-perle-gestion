@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { getRecentOrders } from '../services/cafeService';
 import { Order } from '../types';
-import { Search, Download, FileText } from 'lucide-react';
+import { Search, Filter, Plus, Download } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -14,14 +13,39 @@ import {
   TableRow,
 } from "../components/ui/table";
 
+// Mock data for invoices since getRecentOrders doesn't exist
+const mockInvoices: Order[] = [
+  {
+    id: "inv_001",
+    items: [
+      { drinkId: "1", drinkName: "Espresso", quantity: 2, unitPrice: 2.50 }
+    ],
+    total: 5.00,
+    date: new Date(),
+    agentId: "agent1",
+    agentName: "Aziz",
+    completed: true
+  },
+  {
+    id: "inv_002", 
+    items: [
+      { drinkId: "2", drinkName: "Cappuccino", quantity: 1, unitPrice: 3.50 }
+    ],
+    total: 3.50,
+    date: new Date(Date.now() - 86400000),
+    agentId: "agent2",
+    agentName: "Noureddine",
+    completed: true
+  }
+];
+
 const InvoicesPage: React.FC = () => {
   const [invoices, setInvoices] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // Fetch completed orders as invoices
-    const completedOrders = getRecentOrders(50).filter(order => order.completed);
-    setInvoices(completedOrders);
+    // Use mock data for completed orders as invoices
+    setInvoices(mockInvoices);
   }, []);
 
   const filteredInvoices = invoices.filter(
@@ -31,19 +55,25 @@ const InvoicesPage: React.FC = () => {
   );
 
   return (
-    <DashboardLayout requireAdmin={true}>
+    <DashboardLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-bold text-cafeBlack">Factures</h1>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Rechercher des factures..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-cafeRed focus:border-transparent"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                placeholder="Rechercher des factures..."
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-cafeRed focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <button className="bg-cafeRed text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-red-700 transition-colors">
+              <Plus size={18} className="mr-2" />
+              Nouvelle facture
+            </button>
           </div>
         </div>
 
@@ -51,9 +81,10 @@ const InvoicesPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>N° de facture</TableHead>
+                <TableHead>Numéro</TableHead>
                 <TableHead>Agent</TableHead>
-                <TableHead>Montant</TableHead>
+                <TableHead>Articles</TableHead>
+                <TableHead>Total</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -61,26 +92,22 @@ const InvoicesPage: React.FC = () => {
             <TableBody>
               {filteredInvoices.length > 0 ? (
                 filteredInvoices.map((invoice) => (
-                  <TableRow key={invoice.id}>
-                    <TableCell className="font-medium">FACT-{invoice.id.slice(0, 6)}</TableCell>
+                  <TableRow key={invoice.id} className="cursor-pointer hover:bg-gray-50">
+                    <TableCell className="font-medium">{invoice.id}</TableCell>
                     <TableCell>{invoice.agentName}</TableCell>
+                    <TableCell>{invoice.items.length} articles</TableCell>
                     <TableCell>{invoice.total.toFixed(2)} €</TableCell>
                     <TableCell>{new Date(invoice.date).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
-                        <button className="p-1 hover:text-cafeRed transition-colors" title="Voir">
-                          <FileText size={18} />
-                        </button>
-                        <button className="p-1 hover:text-cafeRed transition-colors" title="Télécharger">
-                          <Download size={18} />
-                        </button>
-                      </div>
+                      <button className="text-cafeRed hover:text-red-700 transition-colors">
+                        <Download size={16} />
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
+                  <TableCell colSpan={6} className="text-center py-8">
                     Aucune facture trouvée
                   </TableCell>
                 </TableRow>

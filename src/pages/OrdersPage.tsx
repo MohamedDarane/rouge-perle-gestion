@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { getRecentOrders } from '../services/cafeService';
 import { Order } from '../types';
 import { Search, Filter, Plus } from 'lucide-react';
 import {
@@ -14,15 +13,40 @@ import {
   TableRow,
 } from "../components/ui/table";
 
+// Mock data for orders since getRecentOrders doesn't exist
+const mockOrders: Order[] = [
+  {
+    id: "ord_001",
+    items: [
+      { drinkId: "1", drinkName: "Espresso", quantity: 2, unitPrice: 2.50 }
+    ],
+    total: 5.00,
+    date: new Date(),
+    agentId: "agent1",
+    agentName: "Aziz",
+    completed: false
+  },
+  {
+    id: "ord_002", 
+    items: [
+      { drinkId: "2", drinkName: "Cappuccino", quantity: 1, unitPrice: 3.50 }
+    ],
+    total: 3.50,
+    date: new Date(Date.now() - 86400000),
+    agentId: "agent2",
+    agentName: "Noureddine",
+    completed: true
+  }
+];
+
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCompleted, setFilterCompleted] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Fetch all orders when component mounts
-    const allOrders = getRecentOrders(100); // Get many orders
-    setOrders(allOrders);
+    // Use mock data instead of getRecentOrders
+    setOrders(mockOrders);
   }, []);
 
   const filteredOrders = orders.filter(

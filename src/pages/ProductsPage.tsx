@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { getActiveDrinks } from '../services/cafeService';
 import { Drink } from '../types';
 import { Coffee, Search, Plus } from 'lucide-react';
 import {
@@ -14,14 +13,38 @@ import {
   TableRow,
 } from "../components/ui/table";
 
+// Mock data for products since getActiveDrinks doesn't exist
+const mockDrinks: Drink[] = [
+  {
+    id: "1",
+    name: "Espresso",
+    price: 2.50,
+    category: "Café",
+    description: "Café espresso traditionnel"
+  },
+  {
+    id: "2", 
+    name: "Cappuccino",
+    price: 3.50,
+    category: "Café",
+    description: "Espresso avec mousse de lait"
+  },
+  {
+    id: "3",
+    name: "Thé vert",
+    price: 2.00,
+    category: "Thé",
+    description: "Thé vert bio"
+  }
+];
+
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Drink[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // Fetch products when component mounts
-    const drinks = getActiveDrinks();
-    setProducts(drinks);
+    // Use mock data instead of getActiveDrinks
+    setProducts(mockDrinks);
   }, []);
 
   const filteredProducts = products.filter(
