@@ -7,6 +7,7 @@ import { Activity, LoginActivity, Revenue } from '../types';
 import StatCard from '../components/StatCard';
 import MoneyCalculatorCard from '../components/MoneyCalculatorCard';
 import TopProductsCard from '../components/TopProductsCard';
+import { Users, Euro, Clock, Coffee } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -23,6 +24,13 @@ const Dashboard: React.FC = () => {
   const todayLogins = loginActivities.filter(login => login.date === today);
   const totalRevenue = revenues.reduce((sum, rev) => sum + rev.amount, 0);
 
+  // Mock data for top products
+  const mockTopProducts = [
+    { name: "Espresso", quantity: 45, revenue: 112.50 },
+    { name: "Cappuccino", quantity: 32, revenue: 112.00 },
+    { name: "Latte", quantity: 28, revenue: 98.00 }
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -32,30 +40,28 @@ const Dashboard: React.FC = () => {
           <StatCard
             title="Connexions aujourd'hui"
             value={todayLogins.length.toString()}
-            icon="users"
-            trend={{ value: 12, isPositive: true }}
+            icon={<Users />}
           />
           <StatCard
             title="Revenus totaux"
             value={`${totalRevenue.toFixed(2)} €`}
-            icon="euro"
-            trend={{ value: 8, isPositive: true }}
+            icon={<Euro />}
           />
           <StatCard
             title="Commandes en cours"
             value="23"
-            icon="clock"
+            icon={<Clock />}
           />
           <StatCard
             title="Produits actifs"
             value="15"
-            icon="coffee"
+            icon={<Coffee />}
           />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MoneyCalculatorCard />
-          <TopProductsCard />
+          <MoneyCalculatorCard totalAmount={totalRevenue} />
+          <TopProductsCard topProducts={mockTopProducts} />
         </div>
 
         <div className="cafe-card">
