@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { Order } from '../types';
+import { getOrders } from '../services/cafeService';
 import { Search, Filter, Plus, Download } from 'lucide-react';
 import {
   Table,
@@ -13,39 +14,15 @@ import {
   TableRow,
 } from "../components/ui/table";
 
-// Mock data for invoices since getRecentOrders doesn't exist
-const mockInvoices: Order[] = [
-  {
-    id: "inv_001",
-    items: [
-      { drinkId: "1", drinkName: "Espresso", quantity: 2, unitPrice: 2.50 }
-    ],
-    total: 5.00,
-    date: new Date(),
-    agentId: "agent1",
-    agentName: "Aziz",
-    completed: true
-  },
-  {
-    id: "inv_002", 
-    items: [
-      { drinkId: "2", drinkName: "Cappuccino", quantity: 1, unitPrice: 3.50 }
-    ],
-    total: 3.50,
-    date: new Date(Date.now() - 86400000),
-    agentId: "agent2",
-    agentName: "Noureddine",
-    completed: true
-  }
-];
-
 const InvoicesPage: React.FC = () => {
   const [invoices, setInvoices] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // Use mock data for completed orders as invoices
-    setInvoices(mockInvoices);
+    // Get completed orders as invoices
+    const orders = getOrders();
+    const completedOrders = orders.filter(order => order.completed);
+    setInvoices(completedOrders);
   }, []);
 
   const filteredInvoices = invoices.filter(
@@ -96,7 +73,7 @@ const InvoicesPage: React.FC = () => {
                     <TableCell className="font-medium">{invoice.id}</TableCell>
                     <TableCell>{invoice.agentName}</TableCell>
                     <TableCell>{invoice.items.length} articles</TableCell>
-                    <TableCell>{invoice.total.toFixed(2)} €</TableCell>
+                    <TableCell>{invoice.total.toFixed(2)} MAD</TableCell>
                     <TableCell>{new Date(invoice.date).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <button className="text-cafeRed hover:text-red-700 transition-colors">

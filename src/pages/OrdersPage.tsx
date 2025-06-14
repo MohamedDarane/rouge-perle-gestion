@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { Order } from '../types';
+import { getOrders } from '../services/cafeService';
 import { Search, Filter, Plus } from 'lucide-react';
 import {
   Table,
@@ -13,40 +14,13 @@ import {
   TableRow,
 } from "../components/ui/table";
 
-// Mock data for orders since getRecentOrders doesn't exist
-const mockOrders: Order[] = [
-  {
-    id: "ord_001",
-    items: [
-      { drinkId: "1", drinkName: "Espresso", quantity: 2, unitPrice: 2.50 }
-    ],
-    total: 5.00,
-    date: new Date(),
-    agentId: "agent1",
-    agentName: "Aziz",
-    completed: false
-  },
-  {
-    id: "ord_002", 
-    items: [
-      { drinkId: "2", drinkName: "Cappuccino", quantity: 1, unitPrice: 3.50 }
-    ],
-    total: 3.50,
-    date: new Date(Date.now() - 86400000),
-    agentId: "agent2",
-    agentName: "Noureddine",
-    completed: true
-  }
-];
-
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCompleted, setFilterCompleted] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Use mock data instead of getRecentOrders
-    setOrders(mockOrders);
+    setOrders(getOrders());
   }, []);
 
   const filteredOrders = orders.filter(
@@ -122,7 +96,7 @@ const OrdersPage: React.FC = () => {
                     <TableCell className="font-medium">{order.id.slice(0, 8)}</TableCell>
                     <TableCell>{order.agentName}</TableCell>
                     <TableCell>{order.items.length} articles</TableCell>
-                    <TableCell>{order.total.toFixed(2)} €</TableCell>
+                    <TableCell>{order.total.toFixed(2)} MAD</TableCell>
                     <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
