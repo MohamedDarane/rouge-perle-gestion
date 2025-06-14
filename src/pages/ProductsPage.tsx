@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { Drink } from '../types';
-import { Coffee, Search, Plus } from 'lucide-react';
+import { getDrinks, addDrink, updateDrink, deleteDrink } from '../services/cafeService';
+import { Coffee, Search, Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -13,38 +14,29 @@ import {
   TableRow,
 } from "../components/ui/table";
 
-// Mock data for products since getActiveDrinks doesn't exist
-const mockDrinks: Drink[] = [
-  {
-    id: "1",
-    name: "Espresso",
-    price: 2.50,
-    category: "Café",
-    description: "Café espresso traditionnel"
-  },
-  {
-    id: "2", 
-    name: "Cappuccino",
-    price: 3.50,
-    category: "Café",
-    description: "Espresso avec mousse de lait"
-  },
-  {
-    id: "3",
-    name: "Thé vert",
-    price: 2.00,
-    category: "Thé",
-    description: "Thé vert bio"
-  }
-];
+interface ProductForm {
+  name: string;
+  price: number;
+  category: string;
+  description: string;
+}
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Drink[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Drink | null>(null);
+  const [formData, setFormData] = useState<ProductForm>({
+    name: '',
+    price: 0,
+    category: '',
+    description: ''
+  });
+
+  const categories = ['Café', 'Thé', 'Jus', 'Boisson', 'Repas', 'Soda', 'Eau'];
 
   useEffect(() => {
-    // Use mock data instead of getActiveDrinks
-    setProducts(mockDrinks);
+    setProducts(getDrinks());
   }, []);
 
   const filteredProducts = products.filter(
@@ -52,6 +44,59 @@ const ProductsPage: React.FC = () => {
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      price: 0,
+      category: '',
+      description: ''
+    });
+    setEditingProduct(null);
+    setShowForm(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingProduct) {
+      // Mise à jour
+      const updatedProduct: Drink = {
+        ...editingProduct,
+        ...formData
+      };
+      const updatedProducts = updateDrink(updatedProduct);
+      setProducts(updatedProducts);
+    } else {
+      // Ajout
+      const newProduct: Drink = {
+        id: `product_${Date.now()}`,
+        ...formData
+      };
+      const updatedProducts = addDrink(newProduct);
+      setProducts(updatedProducts);
+    }
+    
+    resetForm();
+  };
+
+  const handleEdit = (product: Drink) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      description: product.description
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = (productId: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+      const updatedProducts = deleteDrink(productId);
+      setProducts(updatedProducts);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -69,12 +114,108 @@ const ProductsPage: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="bg-cafeRed text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-red-700 transition-colors">
+            <button 
+              onClick={() => setShowForm(!showForm)}
+              className="bg-cafeRed text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-red-700 transition-colors"
+            >
               <Plus size={18} className="mr-2" />
               Ajouter un produit
             </button>
           </div>
         </div>
+
+        {showForm && (
+          <div className="cafe-card p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-cafeBlack">
+                {editingProduct ? 'Modifier le produit' : 'Ajouter un produit'}
+              </h2>
+              <button
+                onClick={resetForm}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom du produit
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cafeRed focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Prix (MAD)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  required
+                  value={formData.price}
+                  onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cafeRed focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Catégorie
+                </label>
+                <select
+                  required
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cafeRed focus:border-transparent"
+                >
+                  <option value="">Sélectionner une catégorie</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cafeRed focus:border-transparent"
+                />
+              </div>
+
+              <div className="md:col-span-2 flex space-x-3">
+                <button
+                  type="submit"
+                  className="bg-cafeRed text-white px-4 py-2 rounded-md flex items-center hover:bg-red-700 transition-colors"
+                >
+                  <Save size={18} className="mr-2" />
+                  {editingProduct ? 'Mettre à jour' : 'Ajouter'}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         <div className="cafe-card overflow-hidden">
           <Table>
@@ -84,6 +225,7 @@ const ProductsPage: React.FC = () => {
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Prix</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -97,13 +239,31 @@ const ProductsPage: React.FC = () => {
                       {product.name}
                     </TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell>{product.price.toFixed(2)} €</TableCell>
+                    <TableCell>{product.price.toFixed(2)} MAD</TableCell>
                     <TableCell className="max-w-xs truncate">{product.description}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          title="Modifier"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
+                  <TableCell colSpan={5} className="text-center py-8">
                     Aucun produit trouvé
                   </TableCell>
                 </TableRow>
