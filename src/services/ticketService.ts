@@ -27,299 +27,6 @@ export const printTicket = (order: Order): void => {
   const barcode = generateBarcode(order.id);
   const thankYouMessage = generateThankYouMessage();
 
-  // Customer receipt
-  const customerTicket = `
-    <html>
-    <head>
-      <title>Ticket Client - La Perle Rouge</title>
-      <style>
-        @media print {
-          body { margin: 0 !important; }
-          .page-break { page-break-after: always; }
-        }
-        body {
-          font-family: 'Courier New', monospace;
-          margin: 0;
-          padding: 20px;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          min-height: 100vh;
-          background-color: #f5f5f5;
-        }
-        .ticket {
-          background: white;
-          width: 300px;
-          padding: 20px;
-          border: 2px solid #e63946;
-          border-radius: 10px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-          text-align: center;
-        }
-        .header {
-          border-bottom: 2px solid #e63946;
-          padding-bottom: 15px;
-          margin-bottom: 15px;
-        }
-        .cafe-name {
-          font-size: 1.8rem;
-          font-weight: bold;
-          color: #e63946;
-          margin-bottom: 5px;
-          letter-spacing: 1px;
-        }
-        .subtitle {
-          font-size: 0.9rem;
-          color: #666;
-          margin-bottom: 10px;
-        }
-        .ticket-info {
-          font-size: 0.8rem;
-          color: #888;
-          margin-bottom: 15px;
-        }
-        .server-info {
-          font-size: 0.9rem;
-          color: #333;
-          margin-bottom: 15px;
-          font-weight: bold;
-        }
-        .items-section {
-          border-top: 1px dashed #ccc;
-          border-bottom: 1px dashed #ccc;
-          padding: 15px 0;
-          margin: 15px 0;
-        }
-        .item {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 8px;
-          font-size: 0.9rem;
-        }
-        .item-details {
-          flex: 1;
-          text-align: left;
-        }
-        .item-name {
-          font-weight: bold;
-          color: #333;
-        }
-        .item-qty {
-          color: #666;
-          font-size: 0.8rem;
-        }
-        .item-price {
-          font-weight: bold;
-          color: #e63946;
-          margin-left: 10px;
-        }
-        .total-section {
-          margin: 20px 0;
-          padding: 15px;
-          background-color: #f8f9fa;
-          border-radius: 8px;
-          border: 2px solid #e63946;
-        }
-        .total {
-          font-size: 1.4rem;
-          font-weight: bold;
-          color: #e63946;
-        }
-        .barcode-section {
-          margin: 20px 0;
-          padding: 15px;
-          background-color: #f0f0f0;
-          border-radius: 5px;
-        }
-        .barcode {
-          font-family: 'Courier New', monospace;
-          font-size: 0.7rem;
-          letter-spacing: 0.5px;
-          word-break: break-all;
-          color: #333;
-          margin-bottom: 5px;
-        }
-        .barcode-id {
-          font-size: 0.7rem;
-          color: #666;
-        }
-        .message {
-          margin: 20px 0;
-          font-style: italic;
-          font-size: 0.85rem;
-          color: #555;
-          line-height: 1.4;
-          padding: 10px;
-          background-color: #fff8f0;
-          border-radius: 5px;
-          border-left: 4px solid #e63946;
-        }
-        .footer {
-          font-size: 0.8rem;
-          color: #888;
-          margin-top: 20px;
-          padding-top: 15px;
-          border-top: 1px solid #eee;
-        }
-        .address {
-          font-size: 0.75rem;
-          color: #999;
-          margin-top: 10px;
-          line-height: 1.3;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="ticket">
-        <div class="header">
-          <div class="cafe-name">LA PERLE ROUGE</div>
-          <div class="subtitle">Café • Restaurant</div>
-          <div class="ticket-info">${new Date(order.date).toLocaleString('fr-FR')}</div>
-        </div>
-        
-        <div class="server-info">Serveur: ${order.agentName}</div>
-        
-        <div class="items-section">
-          ${order.items.map((item, index) => `
-            <div class="item">
-              <div class="item-details">
-                <div class="item-name">${index + 1}. ${item.drinkName}</div>
-                <div class="item-qty">${item.quantity} × ${item.unitPrice.toFixed(2)} MAD</div>
-              </div>
-              <div class="item-price">${(item.unitPrice * item.quantity).toFixed(2)} MAD</div>
-            </div>
-          `).join('')}
-        </div>
-        
-        <div class="total-section">
-          <div class="total">TOTAL: ${order.total.toFixed(2)} MAD</div>
-        </div>
-        
-        <div class="barcode-section">
-          <div class="barcode">${barcode}</div>
-          <div class="barcode-id">ID: ${order.id}</div>
-        </div>
-        
-        <div class="message">${thankYouMessage}</div>
-        
-        <div class="footer">
-          <div>Merci de votre visite!</div>
-          <div class="address">
-            123 Avenue des Cafés<br>
-            75001 Paris, France<br>
-            Tél: 01 23 45 67 89
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  // Agent copy (smaller version)
-  const agentTicket = `
-    <html>
-    <head>
-      <title>Copie Agent - La Perle Rouge</title>
-      <style>
-        @media print {
-          body { margin: 0 !important; }
-        }
-        body {
-          font-family: 'Courier New', monospace;
-          margin: 0;
-          padding: 20px;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          min-height: 100vh;
-          background-color: #f5f5f5;
-        }
-        .agent-ticket {
-          background: #f8f9fa;
-          width: 250px;
-          padding: 15px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          text-align: center;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .agent-header {
-          font-size: 1.2rem;
-          font-weight: bold;
-          color: #e63946;
-          margin-bottom: 10px;
-          border-bottom: 1px solid #ddd;
-          padding-bottom: 8px;
-        }
-        .agent-copy-label {
-          font-size: 0.8rem;
-          color: #666;
-          margin-bottom: 15px;
-          font-weight: bold;
-        }
-        .agent-info {
-          font-size: 0.8rem;
-          margin-bottom: 10px;
-        }
-        .agent-items {
-          font-size: 0.75rem;
-          margin: 10px 0;
-          text-align: left;
-        }
-        .agent-item {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 4px;
-        }
-        .agent-total {
-          font-size: 1.1rem;
-          font-weight: bold;
-          color: #e63946;
-          margin: 15px 0;
-          padding: 8px;
-          background: white;
-          border-radius: 4px;
-        }
-        .agent-barcode {
-          font-size: 0.6rem;
-          color: #666;
-          margin: 10px 0;
-          word-break: break-all;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="agent-ticket">
-        <div class="agent-header">LA PERLE ROUGE</div>
-        <div class="agent-copy-label">COPIE AGENT</div>
-        
-        <div class="agent-info">
-          <div>Date: ${new Date(order.date).toLocaleDateString('fr-FR')}</div>
-          <div>Heure: ${new Date(order.date).toLocaleTimeString('fr-FR')}</div>
-          <div>Agent: ${order.agentName}</div>
-        </div>
-        
-        <div class="agent-items">
-          ${order.items.map(item => `
-            <div class="agent-item">
-              <span>${item.quantity}x ${item.drinkName}</span>
-              <span>${(item.unitPrice * item.quantity).toFixed(2)} MAD</span>
-            </div>
-          `).join('')}
-        </div>
-        
-        <div class="agent-total">TOTAL: ${order.total.toFixed(2)} MAD</div>
-        
-        <div class="agent-barcode">
-          ${barcode}<br>
-          ${order.id}
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
   // Combined document with page break
   const combinedTicket = `
     <html>
@@ -492,31 +199,22 @@ export const printTicket = (order: Order): void => {
         }
         .agent-info {
           font-size: 0.8rem;
-          margin-bottom: 10px;
-        }
-        .agent-items {
-          font-size: 0.75rem;
-          margin: 10px 0;
-          text-align: left;
-        }
-        .agent-item {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 4px;
+          margin-bottom: 15px;
         }
         .agent-total {
-          font-size: 1.1rem;
+          font-size: 1.3rem;
           font-weight: bold;
           color: #e63946;
-          margin: 15px 0;
-          padding: 8px;
+          margin: 20px 0;
+          padding: 15px;
           background: white;
-          border-radius: 4px;
+          border-radius: 8px;
+          border: 2px solid #e63946;
         }
         .agent-barcode {
           font-size: 0.6rem;
           color: #666;
-          margin: 10px 0;
+          margin: 15px 0;
           word-break: break-all;
         }
       </style>
@@ -565,7 +263,7 @@ export const printTicket = (order: Order): void => {
         </div>
       </div>
 
-      <!-- Agent copy with page break -->
+      <!-- Agent copy with page break - simplified version -->
       <div class="agent-ticket page-break">
         <div class="agent-header">LA PERLE ROUGE</div>
         <div class="agent-copy-label">COPIE AGENT</div>
@@ -574,15 +272,6 @@ export const printTicket = (order: Order): void => {
           <div>Date: ${new Date(order.date).toLocaleDateString('fr-FR')}</div>
           <div>Heure: ${new Date(order.date).toLocaleTimeString('fr-FR')}</div>
           <div>Agent: ${order.agentName}</div>
-        </div>
-        
-        <div class="agent-items">
-          ${order.items.map(item => `
-            <div class="agent-item">
-              <span>${item.quantity}x ${item.drinkName}</span>
-              <span>${(item.unitPrice * item.quantity).toFixed(2)} MAD</span>
-            </div>
-          `).join('')}
         </div>
         
         <div class="agent-total">TOTAL: ${order.total.toFixed(2)} MAD</div>
