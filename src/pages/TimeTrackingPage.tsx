@@ -1,262 +1,261 @@
-
-import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle, XCircle, Calendar, User } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { getCurrentUser } from '../services/authService';
-import { clockIn, clockOut, getTimeLogs } from '../services/cafeService';
-import { TimeLog } from '../types';
+import { Calendar, LogIn, LogOut, Users } from 'lucide-react';
+import { TimeLog, LoginActivity, Order } from '../types';
+import { clockIn, clockOut, getTimeLogs, getOrders } from '../services/cafeService';
+import { getCurrentUser, getStoredLoginActivities } from '../services/authService';
 
 const TimeTrackingPage: React.FC = () => {
-  const [currentTimeLog, setCurrentTimeLog] = useState<TimeLog | null>(null);
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [loading, setLoading] = useState(false);
-
+  const [loginActivities, setLoginActivities] = useState<LoginActivity[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [currentLog, setCurrentLog] = useState<TimeLog | null>(null);
+  
   const user = getCurrentUser();
-
+  
   useEffect(() => {
-    loadTimeLogs();
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const loadTimeLogs = () => {
     const logs = getTimeLogs();
     setTimeLogs(logs);
     
+    // Charger les activités de connexion pour l'admin
+    if (user?.role === 'admin') {
+      const loginActivitiesData = getStoredLoginActivities();
+      setLoginActivities(loginActivitiesData);
+      
+      const ordersData = getOrders();
+      setOrders(ordersData);
+    }
+    
     if (user) {
       const today = new Date().toISOString().split('T')[0];
-      const todayLog = logs.find(
-        log => log.userId === user.id && log.date === today && !log.clockOut
+      const userLog = logs.find(
+        log => log.userId === user.id && 
+        log.date === today && 
+        !log.clockOut
       );
-      setCurrentTimeLog(todayLog || null);
-    }
-  };
-
-  const handleClockIn = async () => {
-    setLoading(true);
-    try {
-      const log = clockIn();
-      if (log) {
-        setCurrentTimeLog(log);
-        loadTimeLogs();
+      
+      if (userLog) {
+        setIsClockedIn(true);
+        setCurrentLog(userLog);
       }
-    } catch (error) {
-      console.error('Erreur lors du pointage d\'arrivée:', error);
     }
-    setLoading(false);
-  };
-
-  const handleClockOut = async () => {
-    setLoading(true);
-    try {
-      const log = clockOut();
-      if (log) {
-        setCurrentTimeLog(null);
-        loadTimeLogs();
-      }
-    } catch (error) {
-      console.error('Erreur lors du pointage de départ:', error);
+  }, []);
+  
+  const handleClockIn = () => {
+    const log = clockIn();
+    if (log) {
+      setTimeLogs([...timeLogs, log]);
+      setIsClockedIn(true);
+      setCurrentLog(log);
     }
-    setLoading(false);
   };
-
+  
+  const handleClockOut = () => {
+    const log = clockOut();
+    if (log) {
+      setTimeLogs(timeLogs.map(l => 
+        l.id === log.id ? log : l
+      ));
+      setIsClockedIn(false);
+      setCurrentLog(null);
+    }
+  };
+  
+  // Filtrer les logs de l'utilisateur actuel pour les agents
+  // Les administrateurs voient tous les logs
+  const filteredLogs = user?.role === 'admin' 
+    ? timeLogs 
+    : timeLogs.filter(log => log.userId === user?.id);
+  
+  // Trier les logs par date, du plus récent au plus ancien
+  const sortedLogs = [...filteredLogs].sort((a, b) => {
+    return new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime();
+  });
+  
+  // Trier les activités de connexion par date
+  const sortedLoginActivities = [...loginActivities].sort((a, b) => {
+    return new Date(b.loginTime).getTime() - new Date(a.loginTime).getTime();
+  });
+  
   const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString('fr-FR', {
+    return new Date(date).toLocaleTimeString([], {
       hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+      minute: '2-digit'
     });
   };
-
-  const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+  
+  const formatDuration = (clockIn: Date, clockOut?: Date) => {
+    if (!clockOut) return 'En cours';
+    
+    const diffMs = new Date(clockOut).getTime() - new Date(clockIn).getTime();
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${diffHrs}h ${diffMins}min`;
   };
-
-  const calculateWorkingTime = (clockIn: Date, clockOut?: Date) => {
-    const start = new Date(clockIn);
-    const end = clockOut ? new Date(clockOut) : new Date();
-    const diff = end.getTime() - start.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
+  
+  // Fonction pour obtenir le nombre de tickets par agent
+  const getTicketsByAgent = (userId: string, date: string) => {
+    return orders.filter(order => 
+      order.agentId === userId && 
+      new Date(order.date).toISOString().split('T')[0] === date
+    ).length;
   };
-
-  const userLogs = user ? timeLogs.filter(log => log.userId === user.id) : [];
-  const isAdmin = user?.role === 'admin';
-  const displayLogs = isAdmin ? timeLogs : userLogs;
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-cafeBlack">Suivi du temps</h1>
-          <div className="text-lg font-mono text-cafeBlack">
-            {formatTime(currentTime)}
-          </div>
-        </div>
-
-        {/* Status actuel */}
-        <div className="cafe-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold flex items-center">
-              <Clock className="mr-2" />
-              État actuel
-            </h2>
-            {currentTimeLog && (
-              <span className="text-green-600 font-medium">
-                Présent depuis {formatTime(currentTimeLog.clockIn)}
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-4">
-            {!currentTimeLog ? (
-              <button
-                onClick={handleClockIn}
-                disabled={loading}
-                className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-              >
-                <CheckCircle className="mr-2" size={20} />
-                {loading ? 'Pointage...' : 'Pointer l\'arrivée'}
-              </button>
-            ) : (
-              <button
-                onClick={handleClockOut}
-                disabled={loading}
-                className="flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-              >
-                <XCircle className="mr-2" size={20} />
-                {loading ? 'Pointage...' : 'Pointer le départ'}
-              </button>
-            )}
-          </div>
-
-          {currentTimeLog && (
-            <div className="mt-4 p-4 bg-green-50 rounded-lg">
-              <p className="text-green-800">
-                <strong>Temps de travail actuel :</strong> {calculateWorkingTime(currentTimeLog.clockIn)}
-              </p>
+      <div className="mb-6 text-center">
+        <h1 className="text-3xl font-bold text-cafeBlack">Pointage</h1>
+        <p className="text-gray-500">Gérez vos heures de travail</p>
+      </div>
+      
+      <div className="mb-8 flex flex-col gap-6 lg:flex-row">
+        <div className="flex-1 rounded-lg bg-white p-6 shadow-md">
+          <h2 className="mb-6 text-xl font-semibold text-cafeBlack text-center">Pointage Journalier</h2>
+          
+          {currentLog && (
+            <div className="mb-4 rounded-lg bg-green-50 p-4 text-green-700 text-center">
+              <p>Vous êtes actuellement pointé depuis {formatTime(currentLog.clockIn)}</p>
             </div>
           )}
+          
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={handleClockIn}
+              disabled={isClockedIn}
+              className={`flex items-center rounded-md px-6 py-3 font-medium text-white ${
+                isClockedIn 
+                  ? 'cursor-not-allowed bg-gray-400' 
+                  : 'bg-cafeRed hover:bg-red-700'
+              }`}
+            >
+              <LogIn size={18} className="mr-2" />
+              Pointer Arrivée
+            </button>
+            
+            <button
+              onClick={handleClockOut}
+              disabled={!isClockedIn}
+              className={`flex items-center rounded-md px-6 py-3 font-medium text-white ${
+                !isClockedIn 
+                  ? 'cursor-not-allowed bg-gray-400' 
+                  : 'bg-cafeBlack hover:bg-gray-700'
+              }`}
+            >
+              <LogOut size={18} className="mr-2" />
+              Pointer Départ
+            </button>
+          </div>
         </div>
-
-        {/* Historique */}
-        <div className="cafe-card p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <Calendar className="mr-2" />
-            Historique des pointages
+        
+        <div className="w-full lg:w-96">
+          <h2 className="mb-4 text-xl font-semibold text-cafeBlack text-center">Calendrier</h2>
+          
+          <div className="rounded-lg bg-white p-4 shadow-md">
+            <div className="flex flex-col items-center justify-center py-4 text-cafeRed">
+              <Calendar size={48} className="mb-2" />
+              <p className="text-xl font-bold text-center">
+                {new Date().toLocaleDateString(undefined, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Section des connexions pour l'admin */}
+      {user?.role === 'admin' && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold text-cafeBlack text-center">
+            Connexions des Agents
           </h2>
-
-          {displayLogs.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">
-              Aucun pointage enregistré
-            </p>
-          ) : (
+          
+          <div className="rounded-lg bg-white p-6 shadow-md">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full table-auto">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4">Date</th>
-                    {isAdmin && <th className="text-left py-3 px-4">Agent</th>}
-                    <th className="text-left py-3 px-4">Arrivée</th>
-                    <th className="text-left py-3 px-4">Départ</th>
-                    <th className="text-left py-3 px-4">Temps travaillé</th>
-                    <th className="text-left py-3 px-4">Statut</th>
+                    <th className="pb-3 text-center font-semibold text-cafeBlack">Agent</th>
+                    <th className="pb-3 text-center font-semibold text-cafeBlack">Date</th>
+                    <th className="pb-3 text-center font-semibold text-cafeBlack">Heure de Connexion</th>
+                    <th className="pb-3 text-center font-semibold text-cafeBlack">Tickets Réalisés</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {displayLogs
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((log) => (
-                    <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4">{formatDate(log.date)}</td>
-                      {isAdmin && (
-                        <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <User size={16} className="mr-2 text-cafeRed" />
-                            {log.userName}
-                          </div>
-                        </td>
-                      )}
-                      <td className="py-3 px-4">{formatTime(log.clockIn)}</td>
-                      <td className="py-3 px-4">
-                        {log.clockOut ? formatTime(log.clockOut) : '-'}
-                      </td>
-                      <td className="py-3 px-4">
-                        {log.clockOut ? calculateWorkingTime(log.clockIn, log.clockOut) : calculateWorkingTime(log.clockIn)}
-                      </td>
-                      <td className="py-3 px-4">
-                        {log.clockOut ? (
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                            Terminé
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                            En cours
-                          </span>
-                        )}
+                  {sortedLoginActivities.map((activity) => (
+                    <tr key={activity.id} className="border-b border-gray-100 last:border-0">
+                      <td className="py-3 text-center">{activity.userName}</td>
+                      <td className="py-3 text-center">{new Date(activity.date).toLocaleDateString()}</td>
+                      <td className="py-3 text-center">{formatTime(activity.loginTime)}</td>
+                      <td className="py-3 text-center">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cafeRed text-white">
+                          {getTicketsByAgent(activity.userId, activity.date)} tickets
+                        </span>
                       </td>
                     </tr>
                   ))}
+                  {sortedLoginActivities.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="py-4 text-center text-gray-500">
+                        Aucune connexion enregistrée
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-          )}
+          </div>
         </div>
-
-        {/* Statistiques (visible pour tous) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="cafe-card p-4">
-            <h3 className="font-semibold text-cafeBlack mb-2">Cette semaine</h3>
-            <p className="text-2xl font-bold text-cafeRed">
-              {userLogs
-                .filter(log => {
-                  const logDate = new Date(log.date);
-                  const now = new Date();
-                  const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
-                  return logDate >= weekStart && log.clockOut;
-                })
-                .reduce((total, log) => {
-                  if (log.clockOut) {
-                    const diff = new Date(log.clockOut).getTime() - new Date(log.clockIn).getTime();
-                    return total + Math.floor(diff / (1000 * 60 * 60));
-                  }
-                  return total;
-                }, 0)}h
-            </p>
-          </div>
-
-          <div className="cafe-card p-4">
-            <h3 className="font-semibold text-cafeBlack mb-2">Ce mois</h3>
-            <p className="text-2xl font-bold text-cafeRed">
-              {userLogs
-                .filter(log => {
-                  const logDate = new Date(log.date);
-                  const now = new Date();
-                  return logDate.getMonth() === now.getMonth() && 
-                         logDate.getFullYear() === now.getFullYear() && 
-                         log.clockOut;
-                })
-                .reduce((total, log) => {
-                  if (log.clockOut) {
-                    const diff = new Date(log.clockOut).getTime() - new Date(log.clockIn).getTime();
-                    return total + Math.floor(diff / (1000 * 60 * 60));
-                  }
-                  return total;
-                }, 0)}h
-            </p>
-          </div>
-
-          <div className="cafe-card p-4">
-            <h3 className="font-semibold text-cafeBlack mb-2">Jours travaillés</h3>
-            <p className="text-2xl font-bold text-cafeRed">
-              {userLogs.filter(log => log.clockOut).length}
-            </p>
+      )}
+      
+      <div>
+        <h2 className="mb-4 text-xl font-semibold text-cafeBlack text-center">
+          {user?.role === 'admin' ? 'Tous les Pointages' : 'Mes Pointages'}
+        </h2>
+        
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  {user?.role === 'admin' && (
+                    <th className="pb-3 text-center font-semibold text-cafeBlack">Agent</th>
+                  )}
+                  <th className="pb-3 text-center font-semibold text-cafeBlack">Date</th>
+                  <th className="pb-3 text-center font-semibold text-cafeBlack">Arrivée</th>
+                  <th className="pb-3 text-center font-semibold text-cafeBlack">Départ</th>
+                  <th className="pb-3 text-center font-semibold text-cafeBlack">Durée</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedLogs.map((log) => (
+                  <tr key={log.id} className="border-b border-gray-100 last:border-0">
+                    {user?.role === 'admin' && (
+                      <td className="py-3 text-center">{log.userName}</td>
+                    )}
+                    <td className="py-3 text-center">{new Date(log.date).toLocaleDateString()}</td>
+                    <td className="py-3 text-center">{formatTime(log.clockIn)}</td>
+                    <td className="py-3 text-center">{log.clockOut ? formatTime(log.clockOut) : 'En cours'}</td>
+                    <td className="py-3 text-center">{formatDuration(log.clockIn, log.clockOut)}</td>
+                  </tr>
+                ))}
+                {sortedLogs.length === 0 && (
+                  <tr>
+                    <td 
+                      colSpan={user?.role === 'admin' ? 5 : 4} 
+                      className="py-4 text-center text-gray-500"
+                    >
+                      Aucun pointage enregistré
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

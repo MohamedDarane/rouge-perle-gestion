@@ -1,84 +1,116 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { getRevenues } from '../services/cafeService';
-import { getStoredActivities, getStoredLoginActivities } from '../services/authService';
-import { Activity, LoginActivity, Revenue } from '../types';
 import StatCard from '../components/StatCard';
-import MoneyCalculatorCard from '../components/MoneyCalculatorCard';
 import TopProductsCard from '../components/TopProductsCard';
-import { Users, Euro, Clock, Coffee } from 'lucide-react';
+import MoneyCalculatorCard from '../components/MoneyCalculatorCard';
+import { Activity, BarChart2, Calendar, Coffee, CreditCard, User, Users } from 'lucide-react';
+import { getOrders, getRevenues, getTimeLogs, getTopSellingProducts } from '../services/cafeService';
+import { getStoredActivities } from '../services/authService';
 
 const Dashboard: React.FC = () => {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loginActivities, setLoginActivities] = useState<LoginActivity[]>([]);
-  const [revenues, setRevenues] = useState<Revenue[]>([]);
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [revenue, setRevenue] = useState(0);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [topProducts, setTopProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    setActivities(getStoredActivities());
-    setLoginActivities(getStoredLoginActivities());
-    setRevenues(getRevenues());
+    // Charger les données
+    const orders = getOrders();
+    setOrdersCount(orders.length);
+    
+    const revenues = getRevenues();
+    const totalRevenue = revenues.reduce((sum, r) => sum + r.amount, 0);
+    setRevenue(totalRevenue);
+    
+    const timeLogs = getTimeLogs();
+    const today = new Date().toISOString().split('T')[0];
+    const activeToday = new Set(
+      timeLogs
+        .filter(log => log.date === today)
+        .map(log => log.userId)
+    );
+    setActiveUsers(activeToday.size);
+    
+    const activities = getStoredActivities().slice(0, 10);
+    setRecentActivities(activities);
+    
+    const products = getTopSellingProducts();
+    setTopProducts(products);
   }, []);
-
-  const today = new Date().toISOString().split('T')[0];
-  const todayLogins = loginActivities.filter(login => login.date === today);
-  const totalRevenue = revenues.reduce((sum, rev) => sum + rev.amount, 0);
-
-  // Mock data for top products
-  const mockTopProducts = [
-    { name: "Espresso", quantity: 45, revenue: 112.50 },
-    { name: "Cappuccino", quantity: 32, revenue: 112.00 },
-    { name: "Latte", quantity: 28, revenue: 98.00 }
-  ];
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-cafeBlack">Tableau de bord</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Connexions aujourd'hui"
-            value={todayLogins.length.toString()}
-            icon={<Users />}
-          />
-          <StatCard
-            title="Revenus totaux"
-            value={`${totalRevenue.toFixed(2)} €`}
-            icon={<Euro />}
-          />
-          <StatCard
-            title="Commandes en cours"
-            value="23"
-            icon={<Clock />}
-          />
-          <StatCard
-            title="Produits actifs"
-            value="15"
-            icon={<Coffee />}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MoneyCalculatorCard totalAmount={totalRevenue} />
-          <TopProductsCard topProducts={mockTopProducts} />
-        </div>
-
-        <div className="cafe-card">
-          <h2 className="text-lg font-semibold mb-4 text-cafeBlack">Activités récentes</h2>
-          <div className="space-y-2">
-            {activities.slice(0, 5).map((activity) => (
-              <div key={activity.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                <span className="text-sm text-gray-600">{activity.action}</span>
-                <div className="text-xs text-gray-400">
-                  <span className="font-medium">{activity.userName}</span> - {activity.timestamp.toLocaleString()}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-cafeBlack">Tableau de Bord</h1>
+        <p className="text-gray-500">Bienvenue sur votre tableau de bord de La Perle Rouge</p>
+      </div>
+      
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard 
+          title="Commandes Totales" 
+          value={ordersCount} 
+          icon={<Coffee size={24} />} 
+        />
+        <StatCard 
+          title="Revenu Total" 
+          value={`${revenue.toFixed(2)} MAD`} 
+          icon={<CreditCard size={24} />} 
+        />
+        <StatCard 
+          title="Agents Actifs Aujourd'hui" 
+          value={activeUsers} 
+          icon={<Users size={24} />} 
+        />
+        <StatCard 
+          title="Activités Récentes" 
+          value={recentActivities.length} 
+          icon={<Activity size={24} />} 
+        />
+      </div>
+      
+      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TopProductsCard topProducts={topProducts} />
+        <MoneyCalculatorCard totalAmount={revenue} />
+      </div>
+      
+      <div className="mb-8">
+        <h2 className="mb-4 text-xl font-semibold text-cafeBlack text-center">Activités Récentes</h2>
+        <div className="rounded-lg bg-white p-6 shadow-md mx-auto max-w-4xl">
+          {recentActivities.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+              <User size={48} className="mb-4 text-gray-300" />
+              <p className="text-center">Aucune activité récente</p>
+            </div>
+          ) : (
+            <div className="max-h-80 overflow-y-auto">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="mb-4 flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cafeRed text-white flex-shrink-0">
+                      <User size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-cafeBlack">{activity.userName}</p>
+                      <p className="text-sm text-gray-600">{activity.action}</p>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs text-gray-400">
+                      {new Date(activity.timestamp).toLocaleString('fr-FR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {activities.length === 0 && (
-              <p className="text-gray-500 text-sm">Aucune activité récente</p>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

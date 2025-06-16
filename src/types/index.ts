@@ -1,4 +1,6 @@
 
+export type UserRole = 'admin' | 'agent';
+
 export interface User {
   id: string;
   email: string;
@@ -6,30 +8,12 @@ export interface User {
   role: UserRole;
 }
 
-export type UserRole = 'admin' | 'agent';
-
-export interface LoginActivity {
-  id: string;
-  userId: string;
-  userName: string;
-  loginTime: Date;
-  date: string;
-}
-
-export interface Activity {
-  id: string;
-  userId: string;
-  userName: string;
-  action: string;
-  timestamp: Date;
-}
-
 export interface Drink {
   id: string;
   name: string;
   price: number;
   category: string;
-  description: string;
+  description?: string;
 }
 
 export interface OrderItem {
@@ -49,11 +33,6 @@ export interface Order {
   completed: boolean;
 }
 
-export interface Revenue {
-  date: string;
-  amount: number;
-}
-
 export interface TimeLog {
   id: string;
   userId: string;
@@ -61,4 +40,25 @@ export interface TimeLog {
   clockIn: Date;
   clockOut?: Date;
   date: string;
+}
+
+export interface Activity {
+  id: string;
+  userId: string;
+  userName: string;
+  action: string;
+  timestamp: Date;
+}
+
+export interface LoginActivity {
+  id: string;
+  userId: string;
+  userName: string;
+  loginTime: Date;
+  date: string;
+}
+
+export interface Revenue {
+  date: string;
+  amount: number;
 }
