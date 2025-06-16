@@ -201,15 +201,15 @@ export const printTicket = (order: Order): void => {
           font-size: 0.8rem;
           margin-bottom: 15px;
         }
-        .agent-total {
-          font-size: 1.3rem;
-          font-weight: bold;
-          color: #e63946;
-          margin: 20px 0;
-          padding: 15px;
-          background: white;
-          border-radius: 8px;
-          border: 2px solid #e63946;
+        .agent-items {
+          font-size: 0.8rem;
+          margin: 15px 0;
+          text-align: left;
+        }
+        .agent-item {
+          margin-bottom: 5px;
+          padding: 3px 0;
+          border-bottom: 1px dotted #ddd;
         }
         .agent-barcode {
           font-size: 0.6rem;
@@ -256,14 +256,12 @@ export const printTicket = (order: Order): void => {
         <div class="footer">
           <div>Merci de votre visite!</div>
           <div class="address">
-            123 Avenue des Cafés<br>
-            75001 Paris, France<br>
-            Tél: 01 23 45 67 89
+            DOHA ABOUAB MARRAKECH
           </div>
         </div>
       </div>
 
-      <!-- Agent copy with page break - simplified version -->
+      <!-- Agent copy with page break - products only -->
       <div class="agent-ticket page-break">
         <div class="agent-header">LA PERLE ROUGE</div>
         <div class="agent-copy-label">COPIE AGENT</div>
@@ -274,7 +272,14 @@ export const printTicket = (order: Order): void => {
           <div>Agent: ${order.agentName}</div>
         </div>
         
-        <div class="agent-total">TOTAL: ${order.total.toFixed(2)} MAD</div>
+        <div class="agent-items">
+          <strong>Produits:</strong>
+          ${order.items.map((item, index) => `
+            <div class="agent-item">
+              ${index + 1}. ${item.drinkName} x${item.quantity}
+            </div>
+          `).join('')}
+        </div>
         
         <div class="agent-barcode">
           ${barcode}<br>
