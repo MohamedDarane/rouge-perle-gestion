@@ -63,10 +63,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				cafeRed: '#e63946',
-				cafeBlack: '#1d1d1d',
 				cafeGold: '#daa520',
-				cafeLightGray: '#f1faee',
+				cafeBlack: '#000000',
+				cafeRed: '#daa520',
+				cafeLightGray: '#f8f8f8',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

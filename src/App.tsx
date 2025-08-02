@@ -6,8 +6,10 @@ import './App.css';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import OrdersPage from './pages/OrdersPage';
+import TableOrdersPage from './pages/TableOrdersPage';
 import TimeTrackingPage from './pages/TimeTrackingPage';
 import AgentsPage from './pages/AgentsPage';
+import AgentManagementPage from './pages/AgentManagementPage';
 import InvoicesPage from './pages/InvoicesPage';
 import RevenuePage from './pages/RevenuePage';
 import ProfilePage from './pages/ProfilePage';
@@ -23,9 +25,11 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/table-orders" element={<TableOrdersPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/time-tracking" element={<TimeTrackingPage />} />
         <Route path="/agents" element={<AgentsPage />} />
+        <Route path="/agent-management" element={<AgentManagementPage />} />
         <Route path="/invoices" element={<InvoicesPage />} />
         <Route path="/revenue" element={<RevenuePage />} />
         <Route path="/profile" element={<ProfilePage />} />

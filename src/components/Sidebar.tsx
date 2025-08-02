@@ -31,6 +31,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       icon: <Coffee size={20} />,
     },
     {
+      to: '/table-orders',
+      label: 'Commandes Tables',
+      icon: <Users size={20} />,
+    },
+    {
       to: '/products',
       label: 'Produits',
       icon: <Tags size={20} />,
@@ -44,6 +49,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       to: '/agents',
       label: 'Agents',
       icon: <Users size={20} />,
+      adminOnly: true,
+    },
+    {
+      to: '/agent-management',
+      label: 'Gestion Agents',
+      icon: <User size={20} />,
       adminOnly: true,
     },
     {

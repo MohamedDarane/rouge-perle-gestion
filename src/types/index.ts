@@ -62,3 +62,23 @@ export interface Revenue {
   date: string;
   amount: number;
 }
+
+export interface Table {
+  id: string;
+  number: number;
+  zone: string;
+  status: 'available' | 'occupied';
+  currentOrderId?: string;
+}
+
+export interface TableOrder {
+  id: string;
+  tableId: string;
+  tableNumber: number;
+  items: OrderItem[];
+  total: number;
+  date: Date;
+  agentId: string;
+  agentName: string;
+  status: 'pending' | 'completed';
+}
