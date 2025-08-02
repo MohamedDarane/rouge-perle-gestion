@@ -22,7 +22,7 @@ const initUsersStorage = () => {
   
   if (!localStorage.getItem('passwords')) {
     const initialPasswords: Record<string, string> = {
-      "admin@1erboulevard.com": "admin123",
+      "admin@1erboulevard.com": "admin1967",
       "agent1@1erboulevard.com": "agent123"
     };
     localStorage.setItem('passwords', JSON.stringify(initialPasswords));

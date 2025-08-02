@@ -153,9 +153,11 @@ const TableOrdersPage: React.FC = () => {
                         disabled={table.status === 'occupied'}
                         className={`
                           ${table.status === 'occupied' 
-                            ? 'bg-red-100 text-red-600 border-red-300 cursor-not-allowed' 
-                            : selectedTable === table.id 
-                              ? 'bg-cafeGold text-black' 
+                            ? 'bg-red-500 text-white border-red-500 cursor-not-allowed hover:bg-red-500' 
+                            : table.status === 'available'
+                              ? selectedTable === table.id 
+                                ? 'bg-cafeGold text-black' 
+                                : 'bg-green-500 text-white border-green-500 hover:bg-green-600'
                               : 'border-cafeGold hover:bg-cafeGold hover:text-black'
                           }
                         `}
