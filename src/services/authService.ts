@@ -85,9 +85,16 @@ export const getStoredLoginActivities = (): LoginActivity[] => {
 export const authenticate = (email: string, password: string): User | null => {
   const users = getUsers();
   const passwords = getPasswords();
+  
+  console.log('Tentative de connexion avec:', { email, password });
+  console.log('Utilisateurs disponibles:', users);
+  console.log('Mots de passe stockés:', passwords);
+  
   const user = users.find((user) => user.email === email);
+  console.log('Utilisateur trouvé:', user);
   
   if (user && passwords[email] === password) {
+    console.log('Authentification réussie');
     // Ne jamais stocker le mot de passe dans le localStorage
     localStorage.setItem("currentUser", JSON.stringify(user));
     // Enregistrer la connexion
@@ -96,6 +103,7 @@ export const authenticate = (email: string, password: string): User | null => {
     return user;
   }
   
+  console.log('Authentification échouée');
   return null;
 };
 

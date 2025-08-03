@@ -72,7 +72,7 @@ const LoginPage: React.FC = () => {
             
             <button
               type="submit"
-              className="flex w-full items-center justify-center rounded-md bg-cafeRed py-3 font-medium text-white transition-colors hover:bg-red-700"
+              className="flex w-full items-center justify-center rounded-md bg-cafeGold py-3 font-medium text-black transition-colors hover:bg-yellow-600"
             >
               <LogIn size={18} className="mr-2" />
               Se connecter
