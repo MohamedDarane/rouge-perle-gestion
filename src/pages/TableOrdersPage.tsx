@@ -16,16 +16,9 @@ const TableOrdersPage: React.FC = () => {
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [expandedDescriptions, setExpandedDescriptions] = useState<{ [key: string]: boolean }>({});
   
-  // Fonction pour changer de table (vider le panier si on change de table)
+  // Fonction pour changer de table (conserver le panier)
   const handleTableSelection = (tableId: string) => {
-    if (selectedTable && selectedTable !== tableId && cart.length > 0) {
-      const confirmChange = window.confirm("Changer de table va vider le panier actuel. Continuer ?");
-      if (!confirmChange) return;
-    }
     setSelectedTable(tableId);
-    if (tableId !== selectedTable) {
-      setCart([]); // Vider le panier quand on change de table
-    }
   };
   
   const tables = getTables();
