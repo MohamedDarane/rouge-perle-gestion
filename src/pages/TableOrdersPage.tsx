@@ -16,6 +16,18 @@ const TableOrdersPage: React.FC = () => {
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [expandedDescriptions, setExpandedDescriptions] = useState<{ [key: string]: boolean }>({});
   
+  // Fonction pour changer de table (vider le panier si on change de table)
+  const handleTableSelection = (tableId: string) => {
+    if (selectedTable && selectedTable !== tableId && cart.length > 0) {
+      const confirmChange = window.confirm("Changer de table va vider le panier actuel. Continuer ?");
+      if (!confirmChange) return;
+    }
+    setSelectedTable(tableId);
+    if (tableId !== selectedTable) {
+      setCart([]); // Vider le panier quand on change de table
+    }
+  };
+  
   const tables = getTables();
   const tablesByZone = getTablesByZone();
   
@@ -55,6 +67,11 @@ const TableOrdersPage: React.FC = () => {
   };
   
   const addToCart = (drink: Drink) => {
+    if (!selectedTable) {
+      alert("Veuillez d'abord sélectionner une table.");
+      return;
+    }
+    
     const existingItem = cart.find(item => item.drinkId === drink.id);
     
     if (existingItem) {
@@ -156,7 +173,7 @@ const TableOrdersPage: React.FC = () => {
                         key={table.id}
                         variant={selectedTable === table.id ? "default" : "outline"}
                         size="sm"
-                        onClick={() => setSelectedTable(table.id)}
+                        onClick={() => handleTableSelection(table.id)}
                         disabled={table.status === 'occupied'}
                         className={`
                           ${table.status === 'occupied' 
@@ -165,7 +182,9 @@ const TableOrdersPage: React.FC = () => {
                               ? 'bg-red-500 text-white border-red-500'
                               : table.status === 'available'
                                 ? selectedTable === table.id 
-                                  ? 'bg-cafeGold text-black' 
+                                  ? cart.length > 0 
+                                    ? 'bg-red-500 text-white border-red-500'
+                                    : 'bg-cafeGold text-black'
                                   : 'bg-green-500 text-white border-green-500 hover:bg-green-600'
                                 : 'border-cafeGold hover:bg-cafeGold hover:text-black'
                           }
@@ -182,6 +201,9 @@ const TableOrdersPage: React.FC = () => {
               <div className="mt-4 p-3 bg-cafeGold/10 border border-cafeGold rounded-lg">
                 <p className="text-cafeGold font-semibold">
                   Table sélectionnée: {selectedTableInfo.number} ({selectedTableInfo.zone})
+                  {cart.length > 0 && (
+                    <span className="ml-2 text-red-600 font-bold">- Commande en cours</span>
+                  )}
                 </p>
               </div>
             )}
