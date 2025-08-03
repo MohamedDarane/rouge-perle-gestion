@@ -284,5 +284,5 @@ export const printTableTicket = (order: TableOrder): void => {
       agentWindow.print();
       agentWindow.close();
     }
-  }, 1000);
+  }, 2000); // Augmenter le délai pour s'assurer que le premier ticket s'imprime bien
 };

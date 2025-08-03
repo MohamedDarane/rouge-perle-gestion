@@ -67,7 +67,7 @@ export interface Table {
   id: string;
   number: number;
   zone: string;
-  status: 'available' | 'occupied';
+  status: 'available' | 'occupied' | 'ordering';
   currentOrderId?: string;
 }
 

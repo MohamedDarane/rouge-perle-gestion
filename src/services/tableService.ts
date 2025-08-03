@@ -106,10 +106,10 @@ export const createTableOrder = (tableId: string, items: OrderItem[]): TableOrde
     status: 'pending'
   };
   
-  // Mettre à jour le statut de la table
+  // Mettre à jour le statut de la table (en cours de commande)
   const updatedTables = tables.map(t => 
     t.id === tableId 
-      ? { ...t, status: 'occupied' as const, currentOrderId: newOrder.id }
+      ? { ...t, status: 'ordering' as const, currentOrderId: newOrder.id }
       : t
   );
   

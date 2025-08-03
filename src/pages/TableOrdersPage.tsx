@@ -106,11 +106,18 @@ const TableOrdersPage: React.FC = () => {
       return;
     }
     
+    // Mettre la table en rouge (en cours de commande) avant impression
+    const tables = getTables();
+    const updatedTables = tables.map(t => 
+      t.id === selectedTable ? { ...t, status: 'ordering' as const } : t
+    );
+    localStorage.setItem('tables', JSON.stringify(updatedTables));
+    
     const order = createTableOrder(selectedTable, cart);
     
     if (order) {
       printTableTicket(order);
-      // Finaliser la commande immédiatement après impression
+      // Finaliser la commande immédiatement après impression (table devient verte)
       completeTableOrder(order.id);
       setCart([]);
       setSelectedTable("");
@@ -154,11 +161,13 @@ const TableOrdersPage: React.FC = () => {
                         className={`
                           ${table.status === 'occupied' 
                             ? 'bg-red-500 text-white border-red-500 cursor-not-allowed hover:bg-red-500' 
-                            : table.status === 'available'
-                              ? selectedTable === table.id 
-                                ? 'bg-cafeGold text-black' 
-                                : 'bg-green-500 text-white border-green-500 hover:bg-green-600'
-                              : 'border-cafeGold hover:bg-cafeGold hover:text-black'
+                            : table.status === 'ordering'
+                              ? 'bg-red-500 text-white border-red-500'
+                              : table.status === 'available'
+                                ? selectedTable === table.id 
+                                  ? 'bg-cafeGold text-black' 
+                                  : 'bg-green-500 text-white border-green-500 hover:bg-green-600'
+                                : 'border-cafeGold hover:bg-cafeGold hover:text-black'
                           }
                         `}
                       >
