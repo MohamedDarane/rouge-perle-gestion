@@ -115,8 +115,8 @@ export const printTableTicket = (order: TableOrder): void => {
     <body>
       <div class="ticket">
         <div class="header">
-          <div class="cafe-name">LE 1ER BOULEVARD</div>
-          <div class="address">DOHA ABOUAB MARRAKECH</div>
+          <div class="cafe-name">1ER BOULEVARD</div>
+          <div class="address">GUELIZ</div>
         </div>
         
         <div class="order-info">
