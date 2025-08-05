@@ -41,12 +41,6 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       icon: <Calendar size={20} />,
     },
     {
-      to: '/agents',
-      label: 'Agents',
-      icon: <Users size={20} />,
-      adminOnly: true,
-    },
-    {
       to: '/agent-management',
       label: 'Gestion Agents',
       icon: <User size={20} />,

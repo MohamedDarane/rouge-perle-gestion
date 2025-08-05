@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { Drink } from '../types';
@@ -121,6 +120,8 @@ const ProductsPage: React.FC = () => {
         description: ''
       });
       setShowNewDrinkForm(false);
+      setShowNewCategoryInput(false);
+      setNewCategoryName('');
     }
   };
   

@@ -39,7 +39,16 @@ const AgentManagementPage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
-    loadUsers();
+    const refreshData = () => {
+      loadUsers();
+    };
+    
+    refreshData();
+    
+    // Vérifier les changements toutes les 3 secondes pour synchroniser
+    const interval = setInterval(refreshData, 3000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadUsers = async () => {
