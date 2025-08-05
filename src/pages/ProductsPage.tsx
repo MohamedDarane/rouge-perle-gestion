@@ -17,9 +17,21 @@ const ProductsPage: React.FC = () => {
     description: ''
   });
   const [showNewDrinkForm, setShowNewDrinkForm] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState<string>('');
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
 
+  // Recharger les données à chaque fois pour synchroniser entre admin et agent
   useEffect(() => {
-    setDrinks(getDrinks());
+    const refreshData = () => {
+      setDrinks(getDrinks());
+    };
+    
+    refreshData();
+    
+    // Vérifier les changements toutes les 2 secondes
+    const interval = setInterval(refreshData, 2000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const categories = React.useMemo(() => {
@@ -68,10 +80,27 @@ const ProductsPage: React.FC = () => {
   };
   
   const handleNewDrinkCategoryChange = (value: string) => {
-    setNewDrink({
-      ...newDrink,
-      category: value
-    });
+    if (value === "Nouvelle") {
+      setShowNewCategoryInput(true);
+      setNewCategoryName('');
+    } else {
+      setNewDrink({
+        ...newDrink,
+        category: value
+      });
+      setShowNewCategoryInput(false);
+    }
+  };
+  
+  const handleCreateNewCategory = () => {
+    if (newCategoryName.trim()) {
+      setNewDrink({
+        ...newDrink,
+        category: newCategoryName.trim()
+      });
+      setShowNewCategoryInput(false);
+      setNewCategoryName('');
+    }
   };
   
   const handleAddDrink = () => {
@@ -179,6 +208,32 @@ const ProductsPage: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
+              {showNewCategoryInput && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom de la nouvelle catégorie</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="Ex: Smoothies, Desserts..."
+                      className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cafeRed"
+                    />
+                    <button 
+                      onClick={handleCreateNewCategory}
+                      className="px-3 py-2 bg-cafeRed text-white rounded-md hover:bg-red-700"
+                    >
+                      OK
+                    </button>
+                    <button 
+                      onClick={() => setShowNewCategoryInput(false)}
+                      className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
@@ -191,7 +246,11 @@ const ProductsPage: React.FC = () => {
             </div>
             <div className="flex justify-end mt-4 space-x-3">
               <button 
-                onClick={() => setShowNewDrinkForm(false)}
+                onClick={() => {
+                  setShowNewDrinkForm(false);
+                  setShowNewCategoryInput(false);
+                  setNewCategoryName('');
+                }}
                 className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
               >
                 Annuler

@@ -303,9 +303,18 @@ export const printTableTicket = (order: TableOrder): void => {
   if (customerWindow) {
     customerWindow.document.write(customerTicketContent);
     customerWindow.document.close();
-    customerWindow.focus();
-    customerWindow.print();
-    customerWindow.close();
+    
+    // Attendre que le contenu soit chargé, puis imprimer
+    customerWindow.onload = () => {
+      setTimeout(() => {
+        customerWindow.focus();
+        customerWindow.print();
+        // Fermer automatiquement après impression
+        setTimeout(() => {
+          customerWindow.close();
+        }, 1000);
+      }, 500);
+    };
   }
 
   // Attendre un peu puis imprimer la copie agent
@@ -314,9 +323,18 @@ export const printTableTicket = (order: TableOrder): void => {
     if (agentWindow) {
       agentWindow.document.write(agentTicketContent);
       agentWindow.document.close();
-      agentWindow.focus();
-      agentWindow.print();
-      agentWindow.close();
+      
+      // Attendre que le contenu soit chargé, puis imprimer
+      agentWindow.onload = () => {
+        setTimeout(() => {
+          agentWindow.focus();
+          agentWindow.print();
+          // Fermer automatiquement après impression
+          setTimeout(() => {
+            agentWindow.close();
+          }, 1000);
+        }, 500);
+      };
     }
-  }, 2000); // Augmenter le délai pour s'assurer que le premier ticket s'imprime bien
+  }, 3000); // Délai augmenté pour s'assurer que le premier ticket s'imprime bien
 };

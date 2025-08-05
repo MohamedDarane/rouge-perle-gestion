@@ -12,13 +12,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const TableOrdersPage: React.FC = () => {
   // Panier séparé par table
   const [tablesCarts, setTablesCarts] = useState<{ [tableId: string]: OrderItem[] }>({});
-  const [drinks] = useState<Drink[]>(getDrinks());
+  const [drinks, setDrinks] = useState<Drink[]>(getDrinks());
   const [categoryFilter, setCategoryFilter] = useState<string>("Tous");
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [expandedDescriptions, setExpandedDescriptions] = useState<{ [key: string]: boolean }>({});
   
   // Panier de la table actuelle
   const cart = tablesCarts[selectedTable] || [];
+
+  // Synchroniser les produits automatiquement
+  React.useEffect(() => {
+    const refreshDrinks = () => {
+      setDrinks(getDrinks());
+    };
+    
+    // Vérifier les changements toutes les 2 secondes
+    const interval = setInterval(refreshDrinks, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
   
   // Fonction pour changer de table (conserver le panier)
   const handleTableSelection = (tableId: string) => {

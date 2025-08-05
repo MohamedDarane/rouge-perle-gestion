@@ -26,11 +26,6 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       icon: <Activity size={20} />,
     },
     {
-      to: '/orders',
-      label: 'Commandes',
-      icon: <Coffee size={20} />,
-    },
-    {
       to: '/table-orders',
       label: 'Commandes Tables',
       icon: <Users size={20} />,
