@@ -10,11 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TableOrdersPage: React.FC = () => {
-  const [cart, setCart] = useState<OrderItem[]>([]);
+  // Panier séparé par table
+  const [tablesCarts, setTablesCarts] = useState<{ [tableId: string]: OrderItem[] }>({});
   const [drinks] = useState<Drink[]>(getDrinks());
   const [categoryFilter, setCategoryFilter] = useState<string>("Tous");
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [expandedDescriptions, setExpandedDescriptions] = useState<{ [key: string]: boolean }>({});
+  
+  // Panier de la table actuelle
+  const cart = tablesCarts[selectedTable] || [];
   
   // Fonction pour changer de table (conserver le panier)
   const handleTableSelection = (tableId: string) => {
@@ -59,6 +63,14 @@ const TableOrdersPage: React.FC = () => {
     return description.substring(0, maxLength) + "...";
   };
   
+  // Fonction pour mettre à jour le panier d'une table spécifique
+  const updateTableCart = (tableId: string, newCart: OrderItem[]) => {
+    setTablesCarts(prev => ({
+      ...prev,
+      [tableId]: newCart
+    }));
+  };
+
   const addToCart = (drink: Drink) => {
     if (!selectedTable) {
       alert("Veuillez d'abord sélectionner une table.");
@@ -68,13 +80,14 @@ const TableOrdersPage: React.FC = () => {
     const existingItem = cart.find(item => item.drinkId === drink.id);
     
     if (existingItem) {
-      setCart(cart.map(item => 
+      const newCart = cart.map(item => 
         item.drinkId === drink.id 
           ? { ...item, quantity: item.quantity + 1 } 
           : item
-      ));
+      );
+      updateTableCart(selectedTable, newCart);
     } else {
-      setCart([
+      const newCart = [
         ...cart, 
         {
           drinkId: drink.id,
@@ -82,12 +95,14 @@ const TableOrdersPage: React.FC = () => {
           quantity: 1,
           unitPrice: drink.price
         }
-      ]);
+      ];
+      updateTableCart(selectedTable, newCart);
     }
   };
   
   const removeFromCart = (drinkId: string) => {
-    setCart(cart.filter(item => item.drinkId !== drinkId));
+    const newCart = cart.filter(item => item.drinkId !== drinkId);
+    updateTableCart(selectedTable, newCart);
   };
   
   const updateQuantity = (drinkId: string, quantity: number) => {
@@ -96,9 +111,10 @@ const TableOrdersPage: React.FC = () => {
       return;
     }
     
-    setCart(cart.map(item => 
+    const newCart = cart.map(item => 
       item.drinkId === drinkId ? { ...item, quantity } : item
-    ));
+    );
+    updateTableCart(selectedTable, newCart);
   };
   
   const calculateTotal = () => {
@@ -129,7 +145,8 @@ const TableOrdersPage: React.FC = () => {
       printTableTicket(order);
       // Finaliser la commande immédiatement après impression (table devient verte)
       completeTableOrder(order.id);
-      setCart([]);
+      // Vider le panier de cette table spécifique
+      updateTableCart(selectedTable, []);
       setSelectedTable("");
     }
   };
@@ -174,11 +191,11 @@ const TableOrdersPage: React.FC = () => {
                             : table.status === 'ordering'
                               ? 'bg-red-500 text-white border-red-500'
                               : table.status === 'available'
-                                ? selectedTable === table.id 
-                                  ? cart.length > 0 
-                                    ? 'bg-red-500 text-white border-red-500'
-                                    : 'bg-cafeGold text-black'
-                                  : 'bg-green-500 text-white border-green-500 hover:bg-green-600'
+                                ? (tablesCarts[table.id] && tablesCarts[table.id].length > 0)
+                                  ? 'bg-red-500 text-white border-red-500'
+                                  : selectedTable === table.id 
+                                    ? 'bg-cafeGold text-black'
+                                    : 'bg-green-500 text-white border-green-500 hover:bg-green-600'
                                 : 'border-cafeGold hover:bg-cafeGold hover:text-black'
                           }
                         `}

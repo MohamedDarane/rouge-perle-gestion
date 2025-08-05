@@ -1,5 +1,12 @@
 import { TableOrder } from '../types';
 
+// Générer un code-barres simple
+const generateBarcode = (orderId: string): string => {
+  const barcodeData = `|||| || |||| | || |||| || | |||| | || |||| |||| | || ||||`;
+  return `<div style="font-family: 'Courier New', monospace; font-size: 24px; letter-spacing: 1px; text-align: center; margin: 10px 0; transform: scaleX(0.5);">${barcodeData}</div>
+          <div style="font-size: 12px; text-align: center; color: #666; margin-bottom: 15px;">${orderId}</div>`;
+};
+
 export const printTableTicket = (order: TableOrder): void => {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('fr-FR', {
@@ -107,8 +114,19 @@ export const printTableTicket = (order: TableOrder): void => {
           margin-top: 10px;
         }
         @media print {
-          body { margin: 0; padding: 10px; }
-          .ticket { border: 1px solid #000; }
+          body { 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+          }
+          .ticket { 
+            border: 1px solid #000; 
+            margin: 0;
+            width: 300px;
+          }
         }
       </style>
     </head>
@@ -146,6 +164,8 @@ export const printTableTicket = (order: TableOrder): void => {
         <div class="total">
           TOTAL: ${order.total.toFixed(2)} MAD
         </div>
+        
+        ${generateBarcode(order.id)}
         
         <div class="footer">
           <div>Merci de votre visite !</div>
@@ -228,7 +248,19 @@ export const printTableTicket = (order: TableOrder): void => {
           margin-top: 8px;
         }
         @media print {
-          body { margin: 0; padding: 8px; }
+          body { 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+          }
+          .ticket { 
+            border: 1px solid #000; 
+            margin: 0;
+            width: 260px;
+          }
         }
       </style>
     </head>
@@ -255,6 +287,8 @@ export const printTableTicket = (order: TableOrder): void => {
             </div>
           `).join('')}
         </div>
+        
+        ${generateBarcode(order.id)}
         
         <div class="footer">
           <div>Copie pour l'agent</div>
