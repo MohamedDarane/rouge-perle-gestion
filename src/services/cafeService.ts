@@ -371,7 +371,7 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
   const reportContent = `
     <html>
     <head>
-      <title>Rapport de Revenus - La Perle Rouge</title>
+      <title>Rapport de Revenus - Le 1er Boulevard</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -381,13 +381,13 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
         .header {
           text-align: center;
           margin-bottom: 30px;
-          border-bottom: 2px solid #e63946;
+          border-bottom: 2px solid #daa520;
           padding-bottom: 20px;
         }
         .cafe-name {
           font-size: 2rem;
           font-weight: bold;
-          color: #e63946;
+          color: #daa520;
           margin-bottom: 10px;
         }
         .report-title {
@@ -409,8 +409,8 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
         .total-revenue {
           font-size: 1.5rem;
           font-weight: bold;
-          color: #e63946;
-          border-top: 2px solid #e63946;
+          color: #daa520;
+          border-top: 2px solid #daa520;
           padding-top: 10px;
           margin-top: 10px;
         }
@@ -426,7 +426,7 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
           text-align: left;
         }
         .details-table th {
-          background-color: #e63946;
+          background-color: #daa520;
           color: white;
           font-weight: bold;
         }
@@ -447,7 +447,7 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
     </head>
     <body>
       <div class="header">
-        <div class="cafe-name">LA PERLE ROUGE</div>
+        <div class="cafe-name">Le 1er Boulevard</div>
         <div class="report-title">Rapport de Revenus</div>
         <div style="color: #666; margin-top: 10px;">
           Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}
@@ -494,7 +494,7 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
       </table>
 
       <div class="footer">
-        <p>Ce rapport a été généré automatiquement par le système de gestion de La Perle Rouge</p>
+        <p>Ce rapport a été généré automatiquement par le système de gestion de Le 1er Boulevard</p>
         <p>Pour toute question, veuillez contacter l'administration</p>
       </div>
     </body>
