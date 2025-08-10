@@ -1,4 +1,4 @@
-import { Table, TableOrder, OrderItem } from '../types';
+import { Table, TableOrder, OrderItem, Order } from '../types';
 import { getCurrentUser, registerActivity } from './authService';
 
 // Tables initiales par zone
@@ -146,6 +146,34 @@ export const completeTableOrder = (orderId: string): boolean => {
   
   localStorage.setItem('tables', JSON.stringify(updatedTables));
   localStorage.setItem('tableOrders', JSON.stringify(orders));
+  
+  // Enregistrer également une commande "globale" pour les statistiques et revenus du tableau de bord
+  try {
+    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
+    const normalOrder: Order = {
+      id: `order_${Date.now()}`,
+      items: order.items,
+      total: order.total,
+      date: order.date,
+      agentId: order.agentId,
+      agentName: order.agentName,
+      completed: true,
+    };
+    storedOrders.push(normalOrder);
+    localStorage.setItem('orders', JSON.stringify(storedOrders));
+  } catch (e) {
+    // Fallback en cas d'erreur de parsing
+    const normalOrder: Order = {
+      id: `order_${Date.now()}`,
+      items: order.items,
+      total: order.total,
+      date: order.date,
+      agentId: order.agentId,
+      agentName: order.agentName,
+      completed: true,
+    };
+    localStorage.setItem('orders', JSON.stringify([normalOrder]));
+  }
   
   registerActivity(`A finalisé la commande de la table ${order.tableNumber} - ${order.total.toFixed(2)} MAD`);
   

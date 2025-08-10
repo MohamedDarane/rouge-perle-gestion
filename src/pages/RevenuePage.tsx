@@ -15,13 +15,20 @@ const RevenuePage: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
-    const revenues = getRevenues();
-    setRevenueData(revenues);
     setIsAdmin(checkIsAdmin());
-    
-    // Par défaut, on filtre sur la journée en cours
-    filterByPeriod('day');
-  }, []);
+
+    const refresh = () => {
+      if (periodType === 'custom' && startDate && endDate) {
+        filterByPeriod('custom', startDate, endDate);
+      } else {
+        filterByPeriod(periodType);
+      }
+    };
+
+    refresh();
+    const interval = setInterval(refresh, 2000);
+    return () => clearInterval(interval);
+  }, [periodType, startDate, endDate]);
   
   const filterByPeriod = (period: 'day' | 'month' | 'year' | 'custom', customStart?: string, customEnd?: string) => {
     const revenues = getRevenues();

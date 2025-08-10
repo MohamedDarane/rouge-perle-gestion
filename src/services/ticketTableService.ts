@@ -18,323 +18,115 @@ export const printTableTicket = (order: TableOrder): void => {
     });
   };
 
-  const customerTicketContent = `
+  // Document combiné: ticket client + copie agent (avec saut de page)
+  const combinedContent = `
     <html>
     <head>
-      <title>Ticket - Le 1er Boulevard</title>
+      <title>Tickets - 1er Boulevard</title>
       <style>
+        @media print {
+          body { margin: 0 !important; }
+          .page-break { page-break-before: always; }
+        }
         body {
           font-family: 'Courier New', monospace;
-          font-size: 18px;
-          line-height: 1.6;
           margin: 0;
           padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
           background: white;
           color: black;
-          width: 320px;
-          margin: 0 auto;
         }
+        /* Ticket client */
         .ticket {
-          text-align: center;
+          width: 320px;
           border: 2px solid #daa520;
-          padding: 25px;
-          background: white;
+          padding: 20px;
+          text-align: center;
+          margin-bottom: 30px;
         }
-        .header {
-          border-bottom: 3px solid #daa520;
-          padding-bottom: 20px;
-          margin-bottom: 20px;
-        }
-        .cafe-name {
-          font-size: 28px;
-          font-weight: bold;
-          color: #daa520;
-          margin-bottom: 10px;
-          letter-spacing: 2px;
-        }
-        .address {
-          font-size: 16px;
-          color: #333;
-          margin-bottom: 5px;
-        }
-        .order-info {
-          margin: 25px 0;
-          padding: 15px;
-          background: #f8f8f8;
-          border-radius: 8px;
-          border: 1px solid #daa520;
-        }
-        .table-info {
-          font-size: 22px;
-          font-weight: bold;
-          color: #000;
-          margin-bottom: 15px;
-        }
-        .items {
-          text-align: left;
-          margin: 20px 0;
-        }
-        .item {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 12px;
-          font-size: 18px;
-          padding: 8px 0;
-          border-bottom: 1px dotted #ccc;
-        }
-        .item-details {
-          flex: 1;
-        }
-        .item-name {
-          font-weight: bold;
-          color: #000;
-        }
-        .item-price {
-          font-weight: bold;
-          color: #daa520;
-        }
-        .total {
-          border-top: 3px solid #daa520;
-          padding-top: 15px;
-          margin-top: 20px;
-          font-size: 24px;
-          font-weight: bold;
-          color: #daa520;
-        }
-        .footer {
-          margin-top: 25px;
-          padding-top: 15px;
-          border-top: 2px solid #daa520;
-          font-size: 16px;
-          color: #666;
-        }
-        .date {
-          font-size: 16px;
-          color: #666;
-          margin-top: 10px;
-        }
-        @media print {
-          body { 
-            margin: 0; 
-            padding: 0; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-          }
-          .ticket { 
-            border: 1px solid #000; 
-            margin: 0;
-            width: 300px;
-          }
-        }
+        .header { border-bottom: 2px solid #daa520; padding-bottom: 12px; margin-bottom: 12px; }
+        .cafe-name { font-size: 24px; font-weight: bold; color: #daa520; letter-spacing: 2px; }
+        .address { font-size: 14px; color: #333; }
+        .order-info { margin: 15px 0; padding: 10px; background: #f8f8f8; border: 1px solid #daa520; border-radius: 6px; }
+        .items { width: 100%; text-align: left; margin: 10px 0; }
+        .item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dotted #ccc; font-size: 16px; }
+        .total { border-top: 2px solid #daa520; padding-top: 10px; margin-top: 10px; font-size: 20px; font-weight: bold; color: #daa520; }
+        .barcode { text-align: center; margin: 12px 0; }
+        .barcode div:first-child { transform: scaleX(0.5); }
+        .date { font-size: 14px; color: #666; }
+        .footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #daa520; font-size: 14px; color: #666; }
+        
+        /* Copie agent */
+        .agent-ticket { width: 280px; border: 1px solid #000; padding: 15px; text-align: center; }
+        .agent-header { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; }
+        .agent-items { text-align: left; margin: 10px 0; }
+        .agent-item { padding: 5px 0; border-bottom: 1px dotted #999; font-size: 14px; }
       </style>
     </head>
     <body>
+      <!-- Ticket client -->
       <div class="ticket">
         <div class="header">
           <div class="cafe-name">1ER BOULEVARD</div>
           <div class="address">GUELIZ</div>
         </div>
-        
         <div class="order-info">
-          <div class="table-info">TABLE ${order.tableNumber}</div>
+          <div style="font-weight:bold;">TABLE ${order.tableNumber}</div>
           <div class="date">${formatDate(order.date)}</div>
-          <div style="font-size: 16px; color: #666; margin-top: 8px;">
-            Serveur: ${order.agentName}
-          </div>
+          <div style="font-size: 14px; color: #666; margin-top: 5px;">Serveur: ${order.agentName}</div>
         </div>
-        
         <div class="items">
           ${order.items.map(item => `
             <div class="item">
-              <div class="item-details">
-                <div class="item-name">${item.drinkName}</div>
-                <div style="font-size: 16px; color: #666;">
-                  ${item.quantity} x ${item.unitPrice.toFixed(2)} MAD
-                </div>
+              <div>
+                <div style="font-weight:bold;">${item.drinkName}</div>
+                <div class="date">${item.quantity} x ${item.unitPrice.toFixed(2)} MAD</div>
               </div>
-              <div class="item-price">
-                ${(item.quantity * item.unitPrice).toFixed(2)} MAD
-              </div>
+              <div style="font-weight:bold; color:#daa520;">${(item.quantity * item.unitPrice).toFixed(2)} MAD</div>
             </div>
           `).join('')}
         </div>
-        
-        <div class="total">
-          TOTAL: ${order.total.toFixed(2)} MAD
-        </div>
-        
-        ${generateBarcode(order.id)}
-        
-        <div class="footer">
-          <div>Merci de votre visite !</div>
-          <div style="margin-top: 10px;">À bientôt au 1er Boulevard</div>
-        </div>
+        <div class="total">TOTAL: ${order.total.toFixed(2)} MAD</div>
+        <div class="barcode">${generateBarcode(order.id)}</div>
+        <div class="footer">Merci de votre visite !</div>
       </div>
-    </body>
-    </html>
-  `;
 
-  const agentTicketContent = `
-    <html>
-    <head>
-      <title>Copie Agent - Le 1er Boulevard</title>
-      <style>
-        body {
-          font-family: 'Courier New', monospace;
-          font-size: 16px;
-          line-height: 1.4;
-          margin: 0;
-          padding: 15px;
-          background: white;
-          color: black;
-          width: 280px;
-          margin: 0 auto;
-        }
-        .ticket {
-          text-align: center;
-          border: 1px solid #000;
-          padding: 15px;
-          background: white;
-        }
-        .header {
-          border-bottom: 2px solid #000;
-          padding-bottom: 15px;
-          margin-bottom: 15px;
-        }
-        .cafe-name {
-          font-size: 22px;
-          font-weight: bold;
-          color: #000;
-          margin-bottom: 8px;
-        }
-        .copy-type {
-          font-size: 18px;
-          font-weight: bold;
-          color: #000;
-          margin-bottom: 10px;
-        }
-        .table-info {
-          font-size: 20px;
-          font-weight: bold;
-          color: #000;
-          margin: 15px 0;
-        }
-        .items {
-          text-align: left;
-          margin: 15px 0;
-        }
-        .item {
-          margin-bottom: 8px;
-          font-size: 16px;
-          padding: 5px 0;
-          border-bottom: 1px dotted #999;
-        }
-        .item-name {
-          font-weight: bold;
-          color: #000;
-        }
-        .footer {
-          margin-top: 15px;
-          padding-top: 10px;
-          border-top: 1px solid #000;
-          font-size: 14px;
-          color: #666;
-        }
-        .date {
-          font-size: 14px;
-          color: #666;
-          margin-top: 8px;
-        }
-        @media print {
-          body { 
-            margin: 0; 
-            padding: 0; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-          }
-          .ticket { 
-            border: 1px solid #000; 
-            margin: 0;
-            width: 260px;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="ticket">
-        <div class="header">
-          <div class="cafe-name">LE 1ER BOULEVARD</div>
-          <div class="copy-type">COPIE AGENT</div>
-        </div>
-        
-        <div class="table-info">TABLE ${order.tableNumber}</div>
+      <!-- Saut de page -->
+      <div class="page-break"></div>
+
+      <!-- Copie Agent (articles uniquement) -->
+      <div class="agent-ticket">
+        <div class="agent-header">LE 1ER BOULEVARD — COPIE AGENT</div>
+        <div style="font-weight:bold; margin: 10px 0;">TABLE ${order.tableNumber}</div>
         <div class="date">${formatDate(order.date)}</div>
-        <div style="font-size: 14px; color: #666; margin-top: 5px;">
-          Agent: ${order.agentName}
-        </div>
-        
-        <div class="items">
+        <div style="font-size: 14px; color: #666; margin-top: 5px;">Agent: ${order.agentName}</div>
+        <div class="agent-items">
           ${order.items.map(item => `
-            <div class="item">
-              <div class="item-name">${item.drinkName}</div>
-              <div style="font-size: 14px; color: #666;">
-                Quantité: ${item.quantity}
-              </div>
-            </div>
+            <div class="agent-item">${item.drinkName} — Qté: ${item.quantity}</div>
           `).join('')}
         </div>
-        
-        ${generateBarcode(order.id)}
-        
-        <div class="footer">
-          <div>Copie pour l'agent</div>
-        </div>
+        <div class="barcode">${generateBarcode(order.id)}</div>
       </div>
     </body>
     </html>
   `;
 
-  // Imprimer le ticket client
-  const customerWindow = window.open('', '_blank');
-  if (customerWindow) {
-    customerWindow.document.write(customerTicketContent);
-    customerWindow.document.close();
-    
-    // Attendre que le contenu soit chargé, puis imprimer
-    customerWindow.onload = () => {
+  const printWindow = window.open('', '_blank', 'width=800,height=1000');
+  if (printWindow) {
+    printWindow.document.write(combinedContent);
+    printWindow.document.close();
+    printWindow.onload = () => {
       setTimeout(() => {
-        customerWindow.focus();
-        customerWindow.print();
-        // Fermer automatiquement après impression
-        setTimeout(() => {
-          customerWindow.close();
-        }, 1000);
-      }, 500);
+        printWindow.focus();
+        printWindow.print();
+        setTimeout(() => printWindow.close(), 600);
+      }, 300);
     };
+  } else {
+    alert("Veuillez autoriser les fenêtres popup pour imprimer le ticket.");
   }
-
-  // Attendre un peu puis imprimer la copie agent
-  setTimeout(() => {
-    const agentWindow = window.open('', '_blank');
-    if (agentWindow) {
-      agentWindow.document.write(agentTicketContent);
-      agentWindow.document.close();
-      
-      // Attendre que le contenu soit chargé, puis imprimer
-      agentWindow.onload = () => {
-        setTimeout(() => {
-          agentWindow.focus();
-          agentWindow.print();
-          // Fermer automatiquement après impression
-          setTimeout(() => {
-            agentWindow.close();
-          }, 1000);
-        }, 500);
-      };
-    }
-  }, 3000); // Délai augmenté pour s'assurer que le premier ticket s'imprime bien
 };

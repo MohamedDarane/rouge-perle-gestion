@@ -16,28 +16,33 @@ const Dashboard: React.FC = () => {
   const [topProducts, setTopProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    // Charger les données
-    const orders = getOrders();
-    setOrdersCount(orders.length);
-    
-    const revenues = getRevenues();
-    const totalRevenue = revenues.reduce((sum, r) => sum + r.amount, 0);
-    setRevenue(totalRevenue);
-    
-    const timeLogs = getTimeLogs();
-    const today = new Date().toISOString().split('T')[0];
-    const activeToday = new Set(
-      timeLogs
-        .filter(log => log.date === today)
-        .map(log => log.userId)
-    );
-    setActiveUsers(activeToday.size);
-    
-    const activities = getStoredActivities().slice(0, 10);
-    setRecentActivities(activities);
-    
-    const products = getTopSellingProducts();
-    setTopProducts(products);
+    const loadData = () => {
+      const orders = getOrders();
+      setOrdersCount(orders.length);
+      
+      const revenues = getRevenues();
+      const totalRevenue = revenues.reduce((sum, r) => sum + r.amount, 0);
+      setRevenue(totalRevenue);
+      
+      const timeLogs = getTimeLogs();
+      const today = new Date().toISOString().split('T')[0];
+      const activeToday = new Set(
+        timeLogs
+          .filter(log => log.date === today)
+          .map(log => log.userId)
+      );
+      setActiveUsers(activeToday.size);
+      
+      const activities = getStoredActivities().slice(0, 10);
+      setRecentActivities(activities);
+      
+      const products = getTopSellingProducts();
+      setTopProducts(products);
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
