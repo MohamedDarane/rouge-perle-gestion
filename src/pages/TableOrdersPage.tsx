@@ -144,21 +144,23 @@ const TableOrdersPage: React.FC = () => {
       return;
     }
     
-    // Mettre la table en rouge (en cours de commande) avant impression
-    const tables = getTables();
-    const updatedTables = tables.map(t => 
-      t.id === selectedTable ? { ...t, status: 'ordering' as const } : t
-    );
-    localStorage.setItem('tables', JSON.stringify(updatedTables));
-    
     const order = createTableOrder(selectedTable, cart);
     
     if (order) {
       printTableTicket(order);
-      // Finaliser la commande immédiatement après impression (table devient verte)
-      completeTableOrder(order.id);
-      // Vider le panier de cette table spécifique
+      // Vider seulement le panier après impression
       updateTableCart(selectedTable, []);
+    }
+  };
+
+  const clearTable = () => {
+    if (!selectedTable) {
+      alert("Veuillez sélectionner une table.");
+      return;
+    }
+    
+    if (confirm("Êtes-vous sûr de vouloir vider cette table ?")) {
+      completeTableOrder(selectedTable);
       setSelectedTable("");
     }
   };
@@ -354,7 +356,7 @@ const TableOrdersPage: React.FC = () => {
                 <button
                   onClick={submitOrder}
                   disabled={!selectedTable}
-                  className={`flex w-full items-center justify-center rounded-md py-3 font-medium text-black transition-colors ${
+                  className={`flex w-full items-center justify-center rounded-md py-3 mb-2 font-medium text-black transition-colors ${
                     selectedTable 
                       ? 'bg-cafeGold hover:bg-yellow-600' 
                       : 'bg-gray-300 cursor-not-allowed'
@@ -363,7 +365,19 @@ const TableOrdersPage: React.FC = () => {
                   <div className="flex justify-center mr-2">
                     <Printer size={18} />
                   </div>
-                  Valider et Imprimer Ticket
+                  Imprimer Ticket
+                </button>
+                
+                <button
+                  onClick={clearTable}
+                  disabled={!selectedTable}
+                  className={`flex w-full items-center justify-center rounded-md py-3 font-medium text-white transition-colors ${
+                    selectedTable 
+                      ? 'bg-red-500 hover:bg-red-600' 
+                      : 'bg-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  Vider la Table
                 </button>
               </>
             )}

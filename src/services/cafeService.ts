@@ -105,7 +105,9 @@ const initialDrinks: Drink[] = [
 
 // Initialiser le stockage local si nécessaire
 const initStorage = () => {
-  if (!localStorage.getItem("drinks")) {
+  // Ne plus réinitialiser automatiquement les produits
+  const existingDrinks = localStorage.getItem("drinks");
+  if (!existingDrinks) {
     localStorage.setItem("drinks", JSON.stringify(initialDrinks));
   }
   
@@ -381,13 +383,13 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
         .header {
           text-align: center;
           margin-bottom: 30px;
-          border-bottom: 2px solid #daa520;
+          border-bottom: 2px solid #000;
           padding-bottom: 20px;
         }
         .cafe-name {
           font-size: 2rem;
           font-weight: bold;
-          color: #daa520;
+          color: #000;
           margin-bottom: 10px;
         }
         .report-title {
@@ -409,8 +411,8 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
         .total-revenue {
           font-size: 1.5rem;
           font-weight: bold;
-          color: #daa520;
-          border-top: 2px solid #daa520;
+          color: #000;
+          border-top: 2px solid #000;
           padding-top: 10px;
           margin-top: 10px;
         }
@@ -426,7 +428,7 @@ export const printRevenueReport = (filteredData: any[], periodType: string, star
           text-align: left;
         }
         .details-table th {
-          background-color: #daa520;
+          background-color: #000;
           color: white;
           font-weight: bold;
         }

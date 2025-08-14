@@ -43,22 +43,22 @@ export const printTableTicket = (order: TableOrder): void => {
         /* Ticket client */
         .ticket {
           width: 320px;
-          border: 2px solid #daa520;
+          border: 2px solid #000;
           padding: 20px;
           text-align: center;
           margin-bottom: 30px;
         }
-        .header { border-bottom: 2px solid #daa520; padding-bottom: 12px; margin-bottom: 12px; }
-        .cafe-name { font-size: 24px; font-weight: bold; color: #daa520; letter-spacing: 2px; }
-        .address { font-size: 14px; color: #333; }
-        .order-info { margin: 15px 0; padding: 10px; background: #f8f8f8; border: 1px solid #daa520; border-radius: 6px; }
+        .header { border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 12px; }
+        .cafe-name { font-size: 24px; font-weight: bold; color: #000; letter-spacing: 2px; }
+        .address { font-size: 14px; color: #000; }
+        .order-info { margin: 15px 0; padding: 10px; background: #f8f8f8; border: 1px solid #000; border-radius: 6px; }
         .items { width: 100%; text-align: left; margin: 10px 0; }
-        .item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dotted #ccc; font-size: 16px; }
-        .total { border-top: 2px solid #daa520; padding-top: 10px; margin-top: 10px; font-size: 20px; font-weight: bold; color: #daa520; }
+        .item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dotted #000; font-size: 16px; }
+        .total { border-top: 2px solid #000; padding-top: 10px; margin-top: 10px; font-size: 20px; font-weight: bold; color: #000; }
         .barcode { text-align: center; margin: 12px 0; }
         .barcode div:first-child { transform: scaleX(0.5); }
         .date { font-size: 14px; color: #666; }
-        .footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #daa520; font-size: 14px; color: #666; }
+        .footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #000; font-size: 14px; color: #000; }
         
         /* Copie agent */
         .agent-ticket { width: 280px; border: 1px solid #000; padding: 15px; text-align: center; }
@@ -86,7 +86,7 @@ export const printTableTicket = (order: TableOrder): void => {
                 <div style="font-weight:bold;">${item.drinkName}</div>
                 <div class="date">${item.quantity} x ${item.unitPrice.toFixed(2)} MAD</div>
               </div>
-              <div style="font-weight:bold; color:#daa520;">${(item.quantity * item.unitPrice).toFixed(2)} MAD</div>
+              <div style="font-weight:bold; color:#000;">${(item.quantity * item.unitPrice).toFixed(2)} MAD</div>
             </div>
           `).join('')}
         </div>
