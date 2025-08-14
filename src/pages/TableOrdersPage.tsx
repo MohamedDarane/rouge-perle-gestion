@@ -16,6 +16,7 @@ const TableOrdersPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("Tous");
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [expandedDescriptions, setExpandedDescriptions] = useState<{ [key: string]: boolean }>({});
+  const [printedTables, setPrintedTables] = useState<Set<string>>(new Set());
   
   // Panier de la table actuelle
   const cart = tablesCarts[selectedTable] || [];
@@ -148,6 +149,8 @@ const TableOrdersPage: React.FC = () => {
     
     if (order) {
       printTableTicket(order);
+      // Marquer la table comme imprimée
+      setPrintedTables(prev => new Set(prev).add(selectedTable));
       // Vider seulement le panier après impression
       updateTableCart(selectedTable, []);
     }
@@ -160,7 +163,21 @@ const TableOrdersPage: React.FC = () => {
     }
     
     if (confirm("Êtes-vous sûr de vouloir vider cette table ?")) {
-      completeTableOrder(selectedTable);
+      // Mettre la table en statut 'available' (verte)
+      const tables = getTables();
+      const updatedTables = tables.map(t => 
+        t.id === selectedTable ? { ...t, status: 'available' as const } : t
+      );
+      localStorage.setItem('tables', JSON.stringify(updatedTables));
+      
+      // Retirer la table de la liste des tables imprimées
+      setPrintedTables(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedTable);
+        return newSet;
+      });
+      
+      // Déselectionner la table
       setSelectedTable("");
     }
   };
@@ -368,17 +385,14 @@ const TableOrdersPage: React.FC = () => {
                   Imprimer Ticket
                 </button>
                 
-                <button
-                  onClick={clearTable}
-                  disabled={!selectedTable}
-                  className={`flex w-full items-center justify-center rounded-md py-3 font-medium text-white transition-colors ${
-                    selectedTable 
-                      ? 'bg-red-500 hover:bg-red-600' 
-                      : 'bg-gray-300 cursor-not-allowed'
-                  }`}
-                >
-                  Vider la Table
-                </button>
+                {printedTables.has(selectedTable) && (
+                  <button
+                    onClick={clearTable}
+                    className="flex w-full items-center justify-center rounded-md py-3 font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
+                  >
+                    Vider la Table
+                  </button>
+                )}
               </>
             )}
           </div>
