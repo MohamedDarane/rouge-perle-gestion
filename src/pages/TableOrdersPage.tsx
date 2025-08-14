@@ -170,6 +170,9 @@ const TableOrdersPage: React.FC = () => {
       );
       localStorage.setItem('tables', JSON.stringify(updatedTables));
       
+      // Vider le panier de la table
+      updateTableCart(selectedTable, []);
+      
       // Retirer la table de la liste des tables imprimées
       setPrintedTables(prev => {
         const newSet = new Set(prev);
@@ -385,7 +388,7 @@ const TableOrdersPage: React.FC = () => {
                   Imprimer Ticket
                 </button>
                 
-                {printedTables.has(selectedTable) && (
+                {cart.length > 0 && (
                   <button
                     onClick={clearTable}
                     className="flex w-full items-center justify-center rounded-md py-3 font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"

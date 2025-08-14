@@ -161,6 +161,21 @@ export const completeTableOrder = (orderId: string): boolean => {
     };
     storedOrders.push(normalOrder);
     localStorage.setItem('orders', JSON.stringify(storedOrders));
+    
+    // Enregistrer aussi dans les revenus pour le tableau de bord
+    const revenues = JSON.parse(localStorage.getItem('revenues') || '[]');
+    const today = new Date().toISOString().split('T')[0];
+    const existingRevenue = revenues.find((r: any) => r.date === today);
+    
+    if (existingRevenue) {
+      existingRevenue.amount += order.total;
+    } else {
+      revenues.push({
+        date: today,
+        amount: order.total
+      });
+    }
+    localStorage.setItem('revenues', JSON.stringify(revenues));
   } catch (e) {
     // Fallback en cas d'erreur de parsing
     const normalOrder: Order = {
@@ -173,6 +188,10 @@ export const completeTableOrder = (orderId: string): boolean => {
       completed: true,
     };
     localStorage.setItem('orders', JSON.stringify([normalOrder]));
+    localStorage.setItem('revenues', JSON.stringify([{
+      date: new Date().toISOString().split('T')[0],
+      amount: order.total
+    }]));
   }
   
   registerActivity(`A finalisé la commande de la table ${order.tableNumber} - ${order.total.toFixed(2)} MAD`);
