@@ -4,6 +4,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { User, Mail, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { printRevenueReport, getRevenues } from '../services/cafeService';
+import { checkIsAdmin } from '../services/authService';
 
 const AgentsPage: React.FC = () => {
   const handlePrintDailyReport = () => {
@@ -43,12 +44,18 @@ const AgentsPage: React.FC = () => {
     }
   ];
 
+  const isAdmin = checkIsAdmin();
+
   return (
-    <DashboardLayout requireAdmin={true}>
+    <DashboardLayout>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-cafeBlack">Gestion des Agents</h1>
-          <p className="text-gray-500">Liste des employés de La Perle Rouge</p>
+          <h1 className="text-3xl font-bold text-cafeBlack">
+            {isAdmin ? "Gestion des Agents" : "Équipe de La Perle Rouge"}
+          </h1>
+          <p className="text-gray-500">
+            {isAdmin ? "Liste des employés de La Perle Rouge" : "Liste de l'équipe et impression de rapport journalier"}
+          </p>
         </div>
         <Button
           onClick={handlePrintDailyReport}
@@ -108,15 +115,17 @@ const AgentsPage: React.FC = () => {
           </table>
         </div>
         
-        <div className="mt-6 flex justify-center">
-          <button
-            className="rounded-md bg-cafeRed px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
-            onClick={() => alert("La fonctionnalité d'ajout d'agent sera disponible prochainement")}
-          >
-            <User size={18} className="mr-2 inline" />
-            Ajouter un agent
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="mt-6 flex justify-center">
+            <button
+              className="rounded-md bg-cafeRed px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
+              onClick={() => alert("La fonctionnalité d'ajout d'agent sera disponible prochainement")}
+            >
+              <User size={18} className="mr-2 inline" />
+              Ajouter un agent
+            </button>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

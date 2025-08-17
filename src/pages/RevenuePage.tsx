@@ -96,7 +96,6 @@ const RevenuePage: React.FC = () => {
   
   const handleCustomDateChange = () => {
     if (startDate && endDate) {
-      setPeriodType('custom');
       filterByPeriod('custom', startDate, endDate);
     }
   };
@@ -200,14 +199,24 @@ const RevenuePage: React.FC = () => {
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    if (e.target.value && endDate) {
+                      setTimeout(() => handleCustomDateChange(), 100);
+                    }
+                  }}
                   className="rounded border px-2 py-1 text-sm bg-white text-gray-700 w-32"
                 />
                 <span className="text-xs">à</span>
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    if (startDate && e.target.value) {
+                      setTimeout(() => handleCustomDateChange(), 100);
+                    }
+                  }}
                   className="rounded border px-2 py-1 text-sm bg-white text-gray-700 w-32"
                 />
                 <button
