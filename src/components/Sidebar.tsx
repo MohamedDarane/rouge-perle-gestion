@@ -59,6 +59,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       adminOnly: true,
     },
     {
+      to: '/agent-reports',
+      label: 'Rapports',
+      icon: <Receipt size={20} />,
+      adminOnly: false,
+    },
+    {
       to: '/profile',
       label: 'Mon Profil',
       icon: <User size={20} />,

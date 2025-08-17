@@ -17,6 +17,7 @@ import ProfilePage from './pages/ProfilePage';
 import NotFound from './pages/NotFound';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProductsPage from './pages/ProductsPage';
+import AgentReportsPage from './pages/AgentReportsPage';
 
 // Composant pour protéger les routes
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -59,6 +60,7 @@ function App() {
         <Route path="/agent-management" element={<AdminRoute><AgentManagementPage /></AdminRoute>} />
         <Route path="/invoices" element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
         <Route path="/revenue" element={<ProtectedRoute><RevenuePage /></ProtectedRoute>} />
+        <Route path="/agent-reports" element={<ProtectedRoute><AgentReportsPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="*" element={<NotFound />} />
