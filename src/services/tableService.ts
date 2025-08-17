@@ -119,6 +119,39 @@ export const createTableOrder = (tableId: string, items: OrderItem[]): TableOrde
   localStorage.setItem('tables', JSON.stringify(updatedTables));
   localStorage.setItem('tableOrders', JSON.stringify(orders));
   
+  // Enregistrer immédiatement dans les données du tableau de bord
+  try {
+    const storedOrders: Order[] = JSON.parse(localStorage.getItem('orders') || '[]');
+    const normalOrder: Order = {
+      id: `order_${Date.now()}`,
+      items: items,
+      total: total,
+      date: new Date(),
+      agentId: user.id,
+      agentName: user.name,
+      completed: false, // Pas encore finalisée
+    };
+    storedOrders.push(normalOrder);
+    localStorage.setItem('orders', JSON.stringify(storedOrders));
+    
+    // Enregistrer aussi dans les revenus pour le tableau de bord
+    const revenues = JSON.parse(localStorage.getItem('revenues') || '[]');
+    const today = new Date().toISOString().split('T')[0];
+    const existingRevenue = revenues.find((r: any) => r.date === today);
+    
+    if (existingRevenue) {
+      existingRevenue.amount += total;
+    } else {
+      revenues.push({
+        date: today,
+        amount: total
+      });
+    }
+    localStorage.setItem('revenues', JSON.stringify(revenues));
+  } catch (e) {
+    console.error('Erreur lors de l\'enregistrement des données du tableau de bord:', e);
+  }
+  
   registerActivity(`A créé une commande pour la table ${table.number} (${table.zone}) - ${total.toFixed(2)} MAD`);
   
   return newOrder;

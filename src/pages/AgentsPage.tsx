@@ -1,9 +1,20 @@
 
 import React from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { User, Mail } from 'lucide-react';
+import { User, Mail, Printer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { printRevenueReport, getRevenues } from '../services/cafeService';
 
 const AgentsPage: React.FC = () => {
+  const handlePrintDailyReport = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const revenues = getRevenues();
+    const todayRevenues = revenues.filter(r => r.date === today);
+    const totalRevenue = todayRevenues.reduce((sum, r) => sum + r.amount, 0);
+    
+    printRevenueReport(todayRevenues, 'day', today, today, totalRevenue);
+  };
+
   // Données des agents (normalement à récupérer depuis une API/BDD)
   const agents = [
     {
@@ -34,9 +45,18 @@ const AgentsPage: React.FC = () => {
 
   return (
     <DashboardLayout requireAdmin={true}>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-cafeBlack">Gestion des Agents</h1>
-        <p className="text-gray-500">Liste des employés de La Perle Rouge</p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-cafeBlack">Gestion des Agents</h1>
+          <p className="text-gray-500">Liste des employés de La Perle Rouge</p>
+        </div>
+        <Button
+          onClick={handlePrintDailyReport}
+          className="bg-cafeRed text-white hover:bg-red-700"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          Rapport Journalier
+        </Button>
       </div>
       
       <div className="rounded-lg bg-white p-6 shadow-md">
