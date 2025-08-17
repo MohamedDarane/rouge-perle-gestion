@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { User, UserRole } from '../types';
 import { getAllUsers, addUser, updateUser, deleteUser, changeUserPassword, checkIsAdmin } from '../services/authService';
+import { printRevenueReport, getRevenues } from '../services/cafeService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { UserPlus, Edit, Trash2, Key, Users } from 'lucide-react';
+import { UserPlus, Edit, Trash2, Key, Users, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const AgentManagementPage: React.FC = () => {
@@ -205,6 +206,15 @@ const AgentManagementPage: React.FC = () => {
     setIsPasswordDialogOpen(true);
   };
 
+  const handlePrintDailyReport = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const revenues = getRevenues();
+    const todayRevenues = revenues.filter(r => r.date === today);
+    const totalRevenue = todayRevenues.reduce((sum, r) => sum + r.amount, 0);
+    
+    printRevenueReport(todayRevenues, 'day', today, today, totalRevenue);
+  };
+
   if (!checkIsAdmin()) {
     return (
       <DashboardLayout>
@@ -229,13 +239,22 @@ const AgentManagementPage: React.FC = () => {
           <span className="font-semibold">{users.length} utilisateur(s)</span>
         </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-cafeGold text-black hover:bg-yellow-600">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Ajouter un agent
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-4">
+          <Button
+            onClick={handlePrintDailyReport}
+            className="bg-cafeRed text-white hover:bg-red-700"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Rapport Journalier
+          </Button>
+          
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-cafeGold text-black hover:bg-yellow-600">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Ajouter un agent
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Ajouter un nouvel agent</DialogTitle>
@@ -292,6 +311,7 @@ const AgentManagementPage: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-4">

@@ -237,6 +237,22 @@ export const createOrder = (items: OrderItem[]): Order | null => {
   orders.push(newOrder);
   
   localStorage.setItem("orders", JSON.stringify(orders));
+  
+  // Enregistrer aussi dans les revenus pour le tableau de bord
+  const revenues = JSON.parse(localStorage.getItem('revenues') || '[]');
+  const today = new Date().toISOString().split('T')[0];
+  const existingRevenue = revenues.find((r: any) => r.date === today);
+  
+  if (existingRevenue) {
+    existingRevenue.amount += total;
+  } else {
+    revenues.push({
+      date: today,
+      amount: total
+    });
+  }
+  localStorage.setItem('revenues', JSON.stringify(revenues));
+  
   registerActivity(`A créé une commande de ${total.toFixed(2)} MAD`);
   
   return newOrder;

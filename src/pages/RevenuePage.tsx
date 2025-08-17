@@ -96,6 +96,7 @@ const RevenuePage: React.FC = () => {
   
   const handleCustomDateChange = () => {
     if (startDate && endDate) {
+      setPeriodType('custom');
       filterByPeriod('custom', startDate, endDate);
     }
   };
