@@ -1,7 +1,16 @@
 
-import { Order } from "../types";
+import { Order, TableOrder } from '../../types';
 
-export const generateThankYouMessage = (): string => {
+const generateBarcode = (id: string): string => {
+  const chars = id.split('');
+  return chars.map(char => {
+    const code = char.charCodeAt(0);
+    const pattern = (code % 4) + 1;
+    return '|'.repeat(pattern) + ' ';
+  }).join('');
+};
+
+const generateThankYouMessage = (): string => {
   const messages = [
     "Merci pour votre visite! Nous espérons vous revoir très bientôt chez La Perle Rouge.",
     "Votre sourire est notre plus belle récompense. À très vite chez La Perle Rouge!",
@@ -13,25 +22,28 @@ export const generateThankYouMessage = (): string => {
   return messages[Math.floor(Math.random() * messages.length)];
 };
 
-export const printTicket = (order: Order): void => {
-  // Generate barcode-like pattern
-  const generateBarcode = (id: string) => {
-    const chars = id.split('');
-    return chars.map(char => {
-      const code = char.charCodeAt(0);
-      const pattern = (code % 4) + 1;
-      return '|'.repeat(pattern) + ' ';
-    }).join('');
-  };
+const formatDate = (date: Date): string => {
+  return new Date(date).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 
+export const formatNormalPrint = (order: Order | TableOrder, isTable: boolean = false): void => {
   const barcode = generateBarcode(order.id);
   const thankYouMessage = generateThankYouMessage();
+  
+  const isTableOrder = 'tableNumber' in order;
+  const cafeName = isTableOrder ? "1ER BOULEVARD" : "LA PERLE ROUGE";
+  const location = isTableOrder ? "GUELIZ" : "DOHA ABOUAB MARRAKECH";
 
-  // Combined document with page break
   const combinedTicket = `
     <html>
     <head>
-      <title>Tickets - La Perle Rouge</title>
+      <title>Tickets - ${cafeName}</title>
       <style>
         @media print {
           body { margin: 0 !important; }
@@ -51,7 +63,6 @@ export const printTicket = (order: Order): void => {
           line-height: 1.6;
         }
         
-        /* Customer ticket styles */
         .ticket {
           background: white;
           width: 400px;
@@ -185,15 +196,7 @@ export const printTicket = (order: Order): void => {
           padding-top: 20px;
           border-top: 2px solid #eee;
         }
-        .address {
-          font-size: 0.95rem;
-          color: #999;
-          margin-top: 15px;
-          line-height: 1.5;
-          font-weight: 500;
-        }
 
-        /* Agent ticket styles */
         .agent-ticket {
           background: #f8f9fa;
           width: 320px;
@@ -211,20 +214,6 @@ export const printTicket = (order: Order): void => {
           border-bottom: 2px solid #ddd;
           padding-bottom: 12px;
         }
-        .agent-copy-label {
-          font-size: 1rem;
-          color: #666;
-          margin-bottom: 20px;
-          font-weight: bold;
-          background-color: #e9ecef;
-          padding: 8px;
-          border-radius: 6px;
-        }
-        .agent-info {
-          font-size: 1rem;
-          margin-bottom: 20px;
-          line-height: 1.5;
-        }
         .agent-items {
           font-size: 1rem;
           margin: 20px 0;
@@ -241,26 +230,16 @@ export const printTicket = (order: Order): void => {
           font-size: 1rem;
           font-weight: 500;
         }
-        .agent-barcode {
-          font-size: 0.8rem;
-          color: #666;
-          margin: 20px 0;
-          word-break: break-all;
-          font-family: 'Courier New', monospace;
-          background-color: white;
-          padding: 10px;
-          border-radius: 6px;
-          border: 1px solid #ddd;
-        }
       </style>
     </head>
     <body>
       <!-- Customer ticket -->
       <div class="ticket">
         <div class="header">
-          <div class="cafe-name">LA PERLE ROUGE</div>
-          <div class="subtitle">Café • Restaurant</div>
-          <div class="ticket-info">${new Date(order.date).toLocaleString('fr-FR')}</div>
+          <div class="cafe-name">${cafeName}</div>
+          <div class="subtitle">${isTableOrder ? location : "Café • Restaurant"}</div>
+          <div class="ticket-info">${formatDate(order.date)}</div>
+          ${isTableOrder ? `<div class="ticket-info">TABLE ${(order as TableOrder).tableNumber}</div>` : ''}
         </div>
         
         <div class="server-info">Serveur: ${order.agentName}</div>
@@ -290,22 +269,17 @@ export const printTicket = (order: Order): void => {
         
         <div class="footer">
           <div>Merci de votre visite!</div>
-          <div class="address">
-            DOHA ABOUAB MARRAKECH
-          </div>
+          <div>${location}</div>
         </div>
       </div>
 
-      <!-- Agent copy with page break - products only -->
+      <!-- Agent copy -->
       <div class="agent-ticket page-break">
-        <div class="agent-header">LA PERLE ROUGE</div>
-        <div class="agent-copy-label">COPIE AGENT</div>
-        
-        <div class="agent-info">
-          <div>Date: ${new Date(order.date).toLocaleDateString('fr-FR')}</div>
-          <div>Heure: ${new Date(order.date).toLocaleTimeString('fr-FR')}</div>
-          <div>Agent: ${order.agentName}</div>
-        </div>
+        <div class="agent-header">${cafeName}</div>
+        <div style="font-weight: bold; margin: 10px 0;">COPIE AGENT</div>
+        ${isTableOrder ? `<div>TABLE ${(order as TableOrder).tableNumber}</div>` : ''}
+        <div>${formatDate(order.date)}</div>
+        <div>Agent: ${order.agentName}</div>
         
         <div class="agent-items">
           <strong>Produits:</strong>
@@ -316,9 +290,9 @@ export const printTicket = (order: Order): void => {
           `).join('')}
         </div>
         
-        <div class="agent-barcode">
-          ${barcode}<br>
-          ${order.id}
+        <div class="barcode-section">
+          <div class="barcode">${barcode}</div>
+          <div class="barcode-id">${order.id}</div>
         </div>
       </div>
     </body>
@@ -331,6 +305,7 @@ export const printTicket = (order: Order): void => {
     printWindow.document.close();
     setTimeout(() => {
       printWindow.print();
+      setTimeout(() => printWindow.close(), 600);
     }, 500);
   } else {
     alert("Veuillez autoriser les fenêtres popup pour imprimer le ticket.");

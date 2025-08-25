@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import PrinterSettings from '../components/PrinterSettings';
 import { Coffee, Printer, Milk, Banana, GlassWater, Beer, Sandwich } from 'lucide-react';
 import { Drink, OrderItem } from '../types';
 import { createOrder, getDrinks } from '../services/cafeService';
-import { printTicket } from '../services/ticketService';
+import { printOrder } from '../services/printerService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const OrdersPage: React.FC = () => {
@@ -11,6 +12,7 @@ const OrdersPage: React.FC = () => {
   const [drinks] = useState<Drink[]>(getDrinks());
   const [categoryFilter, setCategoryFilter] = useState<string>("Tous");
   const [expandedDescriptions, setExpandedDescriptions] = useState<{ [key: string]: boolean }>({});
+  const [showPrinterSettings, setShowPrinterSettings] = useState<boolean>(false);
   
   const categories = useMemo(() => {
     const cats = ["Tous", ...new Set(drinks.map(drink => drink.category))];
@@ -97,7 +99,7 @@ const OrdersPage: React.FC = () => {
     const order = createOrder(cart);
     
     if (order) {
-      printTicket(order);
+      printOrder(order);
       setCart([]);
     }
   };
@@ -108,6 +110,23 @@ const OrdersPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-cafeBlack">Commandes</h1>
         <p className="text-gray-500">Créez une nouvelle commande</p>
       </div>
+      
+      {/* Printer Settings Toggle */}
+      <div className="mb-4">
+        <button
+          onClick={() => setShowPrinterSettings(!showPrinterSettings)}
+          className="flex items-center text-sm text-cafeRed hover:text-red-700"
+        >
+          <Printer className="h-4 w-4 mr-1" />
+          Paramètres d'impression
+        </button>
+      </div>
+      
+      {showPrinterSettings && (
+        <div className="mb-6">
+          <PrinterSettings />
+        </div>
+      )}
       
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="flex-1">
